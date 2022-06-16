@@ -57,6 +57,10 @@ class Particle:
 
 
 class MovingParticle:
+    """
+    Particle that moves in a specified direction
+    (you can make it change its alpha (optional))
+    """
     def __init__(
         self,
         screen: pygame.Surface,
@@ -66,6 +70,15 @@ class MovingParticle:
         alpha_speed: int,
         starting_alpha: int = 255,
     ):
+        """
+        Parameters:
+                screen: Display surface
+                image: Particles's surface
+                pos: Starting position
+                vel: Velocity of the particle (added to its position every frame)
+                alpha_speed: Alpha speed (it's added to the image's alpha every frame)
+                starting_alpha: Starting alpha
+        """
         self.screen = screen
         self.image = image
         self.alpha = starting_alpha
@@ -74,6 +87,12 @@ class MovingParticle:
         self.alpha_speed = alpha_speed
 
     def update(self, scroll: pygame.Vector2, delta_time: float):
+        """
+        Updates the particle
+        Parameters:
+                scroll: World scroll
+                delta_time: Time between frames
+        """
         self.pos.x += self.vel.x * delta_time
         self.pos.y += self.vel.y * delta_time
 
