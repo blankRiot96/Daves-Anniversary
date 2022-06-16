@@ -1,2 +1,2 @@
-# unnamed
-A repository for the PGCS game jam game!
+# Unnamed
+A repository for the PGCS summer game jam game!
