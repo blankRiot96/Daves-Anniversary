@@ -1,9 +1,14 @@
-import pygame
-
-from library.utils import Expansion
+"""
+This file is a part of the 'Unnamed' source code.
+The source code is distributed under the MIT license.
+"""
 
 from typing import Sequence
+
+import pygame
+
 from library.common import Pos
+from library.utils import Expansion
 
 
 class Animation:
@@ -19,9 +24,7 @@ class Animation:
 
         self.f_len = len(frames)
 
-        self.expansion = (
-            Expansion(0, 0, self.f_len, self.speed) if reversive else None
-        )
+        self.expansion = Expansion(0, 0, self.f_len, self.speed) if reversive else None
 
         self.index = 0
         self.animated_once = False
@@ -59,4 +62,3 @@ class Animation:
     def play(self, screen, pos, dt, blit_by: str = "topleft"):
         self.update(dt)
         self.draw(screen, pos, blit_by)
-

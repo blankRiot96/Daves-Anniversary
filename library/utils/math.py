@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'Unnamed' source code.
+The source code is distributed under the MIT license.
+"""
+
 import math
 
 
@@ -12,4 +17,3 @@ def get_movement(angle: float, speed) -> tuple[int, int]:
     dy = math.sin(angle) * speed
 
     return dx, dy
-

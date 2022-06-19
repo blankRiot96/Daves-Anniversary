@@ -1,4 +1,7 @@
 """
+This file is a part of the 'Unnamed' source code.
+The source code is distributed under the MIT license.
+
 This file is a part of the 'ecs-pygame' source code.
 The source code is distributed under the MIT license.
 """
@@ -82,5 +85,3 @@ class Expansion:
         else:
             if self.number > self.lower_limit:
                 self.number -= self.speed * dt
-
-

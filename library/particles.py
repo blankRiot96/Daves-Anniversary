@@ -1,3 +1,11 @@
+"""
+This file is a part of the 'Unnamed' source code.
+The source code is distributed under the MIT license.
+"""
+
+import pygame
+
+
 class Particle:
     """
     Customizable particle class.
@@ -155,5 +163,3 @@ class AngularParticle:
             surf = circle_surf(self.size * 2, (20, 20, 20))
             r = surf.get_rect(center=self.rect.center)
             screen.blit(surf, r, special_flags=pygame.BLEND_RGB_ADD)
-
-

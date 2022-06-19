@@ -1,4 +1,7 @@
 """
+This file is a part of the 'Unnamed' source code.
+The source code is distributed under the MIT license.
+
 File containing a bunch of surface manipulation
 based utility
 """
@@ -118,5 +121,3 @@ class Background:
         """
         for layer, speed in self.layers:
             self.draw_layer(layer, world_scroll, speed)
-
-
