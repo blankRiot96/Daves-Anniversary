@@ -15,6 +15,7 @@ class Game:
     """
     Handles game
     """
+
     SCREEN_SIZE = (420, 200)
     FPS_CAP = 120
 
@@ -35,7 +36,7 @@ class Game:
 
     def _grab_events(self):
         """
-        Return window events 
+        Return window events
         """
         raw_dt = self.clock.get_time() / 1000
         dt = raw_dt * 100
@@ -50,7 +51,7 @@ class Game:
             "events": events,
             "mouse_press": mouse_press,
             "mouse_pos": mouse_pos,
-            "key_press": key_press
+            "key_press": key_press,
         }
 
     def _handle_state_switch(self):

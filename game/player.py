@@ -5,6 +5,7 @@ The source code is distributed under the MIT license.
 
 
 import pygame
+
 from game.common import EventInfo
 
 
@@ -27,14 +28,13 @@ class Player:
 
     def change_coord(self, dx: float, dy: float):
         """
-        Changes all the relevant coordinates of the 
-        player 
+        Changes all the relevant coordinates of the
+        player
         """
         self.vec += dx, dy
         self.x += dx
         self.y += dy
         self.rect.topleft = (self.x, self.y)
-
 
     def update(self, event_info: EventInfo) -> None:
         """
