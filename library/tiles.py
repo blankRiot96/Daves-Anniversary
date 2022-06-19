@@ -1,3 +1,12 @@
+"""
+This file is a part of the 'Unnamed' source code.
+The source code is distributed under the MIT license.
+"""
+
+import pygame
+
+from library.utils import Animation
+
 
 class Tile:
     """
@@ -58,4 +67,3 @@ class AnimatedDecorationTile:
         self.animation.play(
             self.screen, self.pos - scroll, self.animation_speed, delta_time
         )
-

@@ -1,6 +1,11 @@
-import pygame
+"""
+This file is a part of the 'Unnamed' source code.
+The source code is distributed under the MIT license.
+"""
 
 import logging
+
+import pygame
 
 logger = logging.getLogger()
 
@@ -29,9 +34,7 @@ def get_images(
     for row in range(rows):
         for col in range(columns):
             # get the image
-            image = sheet.subsurface(
-                pygame.Rect((col * width), (row * height), *size)
-            )
+            image = sheet.subsurface(pygame.Rect((col * width), (row * height), *size))
 
             # add it to the image list
             images.append(image)
@@ -45,8 +48,9 @@ def load_assets(state: str, screen: pygame.Surface) -> dict:
 
     json_files = path.rglob("*.json")
     total_files = len(tuple(json_files))
-    loading_back_rect = pygame.Rect(0, 0, screen.get_width() / 1.3,
-                                    screen.get_height() / 8)
+    loading_back_rect = pygame.Rect(
+        0, 0, screen.get_width() / 1.3, screen.get_height() / 8
+    )
     loading_fore_rect = pygame.Rect(0, 0, 0, loading_back_rect.height)
     total_rect_width = loading_back_rect.width
     width_mult = total_files / total_rect_width
@@ -86,5 +90,3 @@ def load_assets(state: str, screen: pygame.Surface) -> dict:
         pygame.display.flip()
 
     return assets
-
-
