@@ -10,5 +10,6 @@ class States(enum.Enum):
     """
     Enum for game states
     """
+
     MAIN_MENU = "main menu"
     LEVEL = "level"

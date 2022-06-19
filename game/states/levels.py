@@ -37,7 +37,6 @@ class PlayerStage(InitLevelStage):
         self.player.draw(screen)
 
 
-
 class TransitionStage(PlayerStage):
     """
     Handles game state transitions

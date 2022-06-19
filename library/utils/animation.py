@@ -8,7 +8,7 @@ from typing import Sequence
 import pygame
 
 from library.common import Pos
-from library.utils import Expansion
+from library.utils.classes import Expansion
 
 
 class Animation:
