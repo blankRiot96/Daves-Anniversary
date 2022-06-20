@@ -12,6 +12,7 @@ from game.common import EventInfo
 from game.player import Player
 from game.states.enums import States
 from library.transition import FadeTransition
+from library.ui.buttons import Button
 
 
 class InitLevelStage(abc.ABC):
@@ -37,7 +38,39 @@ class PlayerStage(InitLevelStage):
         self.player.draw(screen)
 
 
-class TransitionStage(PlayerStage):
+class ButtonStage(PlayerStage):
+    """
+    Handles buttons
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.buttons = ()
+
+    def update(self, event_info: EventInfo):
+        """
+        Update the Button state
+
+        Parameters:
+            event_info: Information on the window events
+        """
+        super().update(event_info)
+        for button in self.buttons:
+            button.update(event_info["mouse_pos"], event_info["mouse_press"])
+
+    def draw(self, screen: pygame.Surface):
+        """
+        Draw the Button state
+
+        Parameters:
+            screen: pygame.Surface to draw on
+        """
+        super().draw(screen)
+        for button in self.buttons:
+            button.draw(screen)
+
+
+class TransitionStage(ButtonStage):
     """
     Handles game state transitions
     """
