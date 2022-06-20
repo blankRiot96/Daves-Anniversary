@@ -19,6 +19,6 @@ TILE_HEIGHT = 32
 
 # Paths
 
-ROOT_DIR = pathlib.Path("..")
+ROOT_DIR = pathlib.Path(".")
 ASSETS_DIR = ROOT_DIR / "assets"
 MAP_DIR = ASSETS_DIR / "maps"
