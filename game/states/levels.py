@@ -11,6 +11,7 @@ import pygame
 from game.common import EventInfo
 from game.player import Player
 from game.states.enums import States
+from library.effects import ExplosionManager
 from library.transition import FadeTransition
 from library.ui.buttons import Button
 
@@ -20,6 +21,7 @@ class InitLevelStage(abc.ABC):
         """
         Initialize some attributes
         """
+        self.event_info = {}
 
 
 class PlayerStage(InitLevelStage):
@@ -32,13 +34,14 @@ class PlayerStage(InitLevelStage):
         self.player = Player()
 
     def update(self, event_info: EventInfo):
+        self.event_info = event_info
         self.player.update(event_info)
 
     def draw(self, screen: pygame.Surface):
         self.player.draw(screen)
 
 
-class ButtonStage(PlayerStage):
+class ButtonStage:  # Skipped for now
     """
     Handles buttons
     """
@@ -70,7 +73,28 @@ class ButtonStage(PlayerStage):
             button.draw(screen)
 
 
-class TransitionStage(ButtonStage):
+class ExplosionStage:  # Skipped for now
+    def __init__(self):
+        super().__init__()
+        self.explosion_manager = ExplosionManager("arcade")
+
+    def update(self, event_info: EventInfo) -> None:
+        super().update(event_info)
+        self.explosion_manager.update()
+
+        for event in event_info["events"]:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.explosion_manager.create_explosion(event.pos)
+
+    def draw(self, screen: pygame.Surface):
+        super().draw(screen)
+        self.explosion_manager.draw(
+            screen,
+            self.event_info["dt"]
+        )
+
+
+class TransitionStage(PlayerStage):
     """
     Handles game state transitions
     """
