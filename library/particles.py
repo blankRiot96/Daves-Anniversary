@@ -4,6 +4,10 @@ The source code is distributed under the MIT license.
 """
 
 import pygame
+import math
+import random
+
+from library.utils.funcs import get_movement, circle_surf
 
 
 class Particle:
