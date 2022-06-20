@@ -4,6 +4,7 @@ The source code is distributed under the MIT license.
 """
 
 from library.common import Events, Pos, Size
+import pygame
 
 
 class Toggle:
