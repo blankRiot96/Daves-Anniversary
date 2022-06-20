@@ -130,7 +130,7 @@ class TransitionStage(CameraStage):
 
     def __init__(self):
         super().__init__()
-        self.transition = FadeTransition(True, self.FADE_SPEED, (420, 200))
+        self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
         self.next_state: Optional[States] = None
 
         # Store any information needed to be passed
