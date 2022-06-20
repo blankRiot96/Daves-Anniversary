@@ -7,6 +7,7 @@ import asyncio
 
 import pygame
 
+from game.common import HEIGHT, WIDTH
 from game.states.enums import States
 from game.states.levels import Level
 
@@ -16,7 +17,6 @@ class Game:
     Handles game
     """
 
-    SCREEN_SIZE = (420, 200)
     FPS_CAP = 120
 
     def __init__(self):
@@ -24,7 +24,7 @@ class Game:
         Initialize Game class
         """
         self.alive = True
-        self.screen = pygame.display.set_mode(self.SCREEN_SIZE, pygame.SCALED)
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED)
         self.state: States = States.LEVEL
 
         # Dictionary to initialize respective game state

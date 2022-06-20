@@ -13,14 +13,12 @@ class Tile:
     Collidable tile
     """
 
-    def __init__(self, screen: pygame.Surface, image: pygame.Surface, pos: tuple[int]):
+    def __init__(self, image: pygame.Surface, pos: tuple[int, int]):
         """
         Parameters:
-                screen: Surface on which the tile is drawn
                 image: Image of the tile
                 pos: Position of the tile
         """
-        self.screen = screen
         self.image = image
         self.rect = self.image.get_rect(topleft=pos)
 
@@ -30,7 +28,6 @@ class Tile:
         Parameters:
                 scroll: World camera scroll
         """
-        self.screen.blit(self.image, self.rect.topleft - scroll)
 
 
 class AnimatedDecorationTile:

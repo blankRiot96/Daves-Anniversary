@@ -6,6 +6,8 @@ File containing a bunch of surface manipulation
 based utility
 """
 
+import pygame
+
 
 class FadingImage:
     """
