@@ -43,10 +43,10 @@ def resize(extract: Sequence[pygame.Surface], scale: float):
     return scaled
 
 
-def turn_left(extract):
-    left_images = [pygame.transform.flip(img, True, False) for img in extract]
+def flip_images(extract: Sequence):
+    flipped_images = [pygame.transform.flip(img, True, False) for img in extract]
 
-    return left_images
+    return flipped_images
 
 
 def get_movement(angle: float, speed) -> tuple[int, int]:
