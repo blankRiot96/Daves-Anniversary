@@ -2,22 +2,25 @@
 This file is a part of the 'Unnamed' source code.
 The source code is distributed under the MIT license.
 """
+from typing import Dict, Tuple
+
 import pygame
+
 import library.utils
-from typing import Tuple, Dict
 
 
 class Button:
     """
     Clickable button
     """
+
     def __init__(
         self,
         pos: Tuple[int, int],
         size: Tuple[int, int],
         colors: Dict[str, Tuple[int, int, int]],
         font_name: str,
-        text: str
+        text: str,
     ) -> None:
         """
         Parameters:
@@ -38,7 +41,9 @@ class Button:
         self.state = "static"
         self.clicked = False
 
-    def update(self, mouse_pos: Tuple[int, int], mouse_buttons: Tuple[int, int, int]) -> None:
+    def update(
+        self, mouse_pos: Tuple[int, int], mouse_buttons: Tuple[int, int, int]
+    ) -> None:
         """
         Updates the button
         Parameters:

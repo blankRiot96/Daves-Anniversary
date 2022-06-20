@@ -3,11 +3,14 @@ This file is a part of the 'Unnamed' source code.
 The source code is distributed under the MIT license.
 """
 
+from functools import lru_cache
+from pathlib import Path
+
+import pygame
+
 from library.utils.animation import Animation
 from library.utils.classes import Expansion, Glow, Time
-from functools import lru_cache
-import pygame
-from pathlib import Path
+
 pygame.font.init()
 
 

@@ -69,6 +69,7 @@ class MovingParticle:
     Particle that moves in a specified direction
     (you can make it change its alpha (optional))
     """
+
     def __init__(
         self,
         screen: pygame.Surface,
