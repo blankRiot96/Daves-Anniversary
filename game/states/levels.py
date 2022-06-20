@@ -8,9 +8,13 @@ from typing import Optional
 
 import pygame
 
-from game.common import EventInfo
+from game.common import HEIGHT, MAP_DIR, WIDTH, EventInfo
 from game.player import Player
 from game.states.enums import States
+
+from library.tilemap import TileLayerMap
+from library.transition import FadeTransition
+from library.ui.camera import Camera
 from library.effects import ExplosionManager
 from library.transition import FadeTransition
 from library.ui.buttons import Button
@@ -21,10 +25,26 @@ class InitLevelStage(abc.ABC):
         """
         Initialize some attributes
         """
+        self.camera = Camera(WIDTH, HEIGHT)
         self.event_info = {}
 
 
-class PlayerStage(InitLevelStage):
+class TileStage(InitLevelStage):
+    """
+    Handles tilemap rendering
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.tilemap = TileLayerMap(MAP_DIR / "placeholder_map.tmx")
+
+        self.map_surf = self.tilemap.make_map()
+
+    def draw(self, screen: pygame.Surface):
+        screen.blit(self.map_surf, self.camera.apply((0, 0)))
+
+
+class PlayerStage(TileStage):
     """
     Handle player related actions
     """
@@ -34,11 +54,18 @@ class PlayerStage(InitLevelStage):
         self.player = Player()
 
     def update(self, event_info: EventInfo):
+        self.player.update(event_info, self.tilemap)
         self.event_info = event_info
-        self.player.update(event_info)
 
     def draw(self, screen: pygame.Surface):
-        self.player.draw(screen)
+        super().draw(screen)
+        self.player.draw(screen, self.camera)
+
+
+class CameraStage(PlayerStage):
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+        self.camera.adjust_to(self.player.rect)
 
 
 class ButtonStage:  # Skipped for now
@@ -94,7 +121,7 @@ class ExplosionStage:  # Skipped for now
         )
 
 
-class TransitionStage(PlayerStage):
+class TransitionStage(CameraStage):
     """
     Handles game state transitions
     """
