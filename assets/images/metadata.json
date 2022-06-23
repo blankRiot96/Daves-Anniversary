@@ -1,0 +1,13 @@
+{
+    "sound_icon_off.png": {
+        "sprite_sheet": null,
+        "convert_alpha": true,
+        "states": ["level"]
+    },
+    "sound_icon_on.png": {
+        "sprite_sheet": null,
+        "convert_alpha": true,
+        "states": ["level"]
+    }
+}
+
