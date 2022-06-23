@@ -3,11 +3,12 @@ This file is a part of the 'Unnamed' source code.
 The source code is distributed under the MIT license.
 """
 
-import pygame
 import math
 import random
 
-from library.utils.funcs import get_movement, circle_surf
+import pygame
+
+from library.utils.funcs import circle_surf, get_movement
 
 
 class Particle:

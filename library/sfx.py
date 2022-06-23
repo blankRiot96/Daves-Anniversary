@@ -1,9 +1,14 @@
-import logging
-import pygame
-from pathlib import Path
-import json
-from dataclasses import dataclass
+"""
+This file is a part of the 'Unnamed' source code.
+The source code is distributed under the MIT license.
+"""
 
+import json
+import logging
+from dataclasses import dataclass
+from pathlib import Path
+
+import pygame
 
 logger = logging.getLogger()
 

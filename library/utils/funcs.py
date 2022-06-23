@@ -1,3 +1,8 @@
+"""
+This file is a part of the 'Unnamed' source code.
+The source code is distributed under the MIT license.
+"""
+
 import math
 import time
 from typing import Sequence

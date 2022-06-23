@@ -10,17 +10,15 @@ import pygame
 
 from game.common import HEIGHT, MAP_DIR, WIDTH, EventInfo
 from game.player import Player
-from game.states.enums import States
 from game.sound_icon import SoundIcon
-
-from library.tilemap import TileLayerMap
-from library.transition import FadeTransition
-from library.ui.camera import Camera
+from game.states.enums import States
 from library.effects import ExplosionManager
-from library.transition import FadeTransition
-from library.ui.buttons import Button
 from library.sfx import SFXManager
 from library.sprite.load import load_assets
+from library.tilemap import TileLayerMap
+from library.transition import FadeTransition
+from library.ui.buttons import Button
+from library.ui.camera import Camera
 
 
 class InitLevelStage(abc.ABC):
@@ -82,9 +80,7 @@ class UIStage(CameraStage):  # Skipped for now
         super().__init__()
         self.buttons = ()
 
-        self.sound_icon = SoundIcon(
-            self.sfx_manager, self.assets, center_pos=(700, 30)
-        )
+        self.sound_icon = SoundIcon(self.sfx_manager, self.assets, center_pos=(700, 30))
 
     def update(self, event_info: EventInfo):
         """

@@ -1,4 +1,7 @@
 """
+This file is a part of the 'Unnamed' source code.
+The source code is distributed under the MIT license.
+
 An explosion, is essentially just a way to 
 handle particles going in all directions with 
 different sizes and speeds
@@ -10,10 +13,12 @@ explode around that place, explosions are great
 
 
 import random
-import pygame
-from library.particles import AngularParticle
-from library.common import Pos
 from typing import List, Set
+
+import pygame
+
+from library.common import Pos
+from library.particles import AngularParticle
 
 
 class Explosion:

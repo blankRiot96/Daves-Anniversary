@@ -1,6 +1,12 @@
+"""
+This file is a part of the 'Unnamed' source code.
+The source code is distributed under the MIT license.
+"""
+
 import pygame
-from library.ui.slider import HorizontalSlider
+
 from library.sfx import SFXManager as _SFXManager
+from library.ui.slider import HorizontalSlider
 
 
 class SoundIcon:
@@ -23,8 +29,8 @@ class SoundIcon:
             (0, 0),
             (
                 slider_rect.width + self.rect.width,
-                slider_rect.height + self.rect.height + 30
-            )
+                slider_rect.height + self.rect.height + 30,
+            ),
         )
         self.larger_rect.center = center_pos
 
@@ -39,7 +45,9 @@ class SoundIcon:
         self._handle_slider = True
 
     def update(self, event_info):
-        self._handle_slider = self.switch and self.larger_rect.collidepoint(event_info["mouse_pos"])
+        self._handle_slider = self.switch and self.larger_rect.collidepoint(
+            event_info["mouse_pos"]
+        )
         if self._handle_slider:
             self.slider.update(event_info["events"])
 
