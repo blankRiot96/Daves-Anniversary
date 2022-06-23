@@ -12,6 +12,7 @@ from game.common import HEIGHT, MAP_DIR, WIDTH, EventInfo
 from game.player import Player
 from game.sound_icon import SoundIcon
 from game.states.enums import States
+
 from library.effects import ExplosionManager
 from library.sfx import SFXManager
 from library.sprite.load import load_assets
