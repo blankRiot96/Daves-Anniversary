@@ -6,6 +6,7 @@ The source code is distributed under the MIT license.
 import json
 import logging
 from pathlib import Path
+from typing import Tuple
 
 import pygame
 
@@ -14,7 +15,7 @@ logger = logging.getLogger()
 
 def get_images(
     sheet: pygame.Surface,
-    size: tuple[int],
+    size: Tuple[int],
 ):
     """
     Converts a sprite sheet to a list of surfaces

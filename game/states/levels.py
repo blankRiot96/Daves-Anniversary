@@ -11,13 +11,11 @@ import pygame
 from game.common import HEIGHT, MAP_DIR, WIDTH, EventInfo
 from game.player import Player
 from game.states.enums import States
-
+from library.effects import ExplosionManager
 from library.tilemap import TileLayerMap
 from library.transition import FadeTransition
-from library.ui.camera import Camera
-from library.effects import ExplosionManager
-from library.transition import FadeTransition
 from library.ui.buttons import Button
+from library.ui.camera import Camera
 
 
 class InitLevelStage(abc.ABC):
@@ -115,10 +113,7 @@ class ExplosionStage:  # Skipped for now
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
-        self.explosion_manager.draw(
-            screen,
-            self.event_info["dt"]
-        )
+        self.explosion_manager.draw(screen, self.event_info["dt"])
 
 
 class TransitionStage(CameraStage):
