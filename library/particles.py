@@ -3,11 +3,13 @@ This file is a part of the 'Unnamed' source code.
 The source code is distributed under the MIT license.
 """
 
-import pygame
 import math
 import random
+from typing import Tuple, Union
 
-from library.utils.funcs import get_movement, circle_surf
+import pygame
+
+from library.utils.funcs import circle_surf, get_movement
 
 
 class Particle:
@@ -23,7 +25,7 @@ class Particle:
         radius_speed: int = 0.075,
         vel: tuple[int] = (-0.5, 0.1),
         gravity: float = 0.1,
-        color: tuple[int] | str = "white",
+        color: Union[Tuple[int, int, int], str] = "white",
     ):
         """
         Parameters:
@@ -78,8 +80,8 @@ class MovingParticle:
         self,
         screen: pygame.Surface,
         image: pygame.Surface,
-        pos: tuple[int],
-        vel: tuple[int],
+        pos: Tuple[int],
+        vel: Tuple[int],
         alpha_speed: int,
         starting_alpha: int = 255,
     ):
@@ -118,10 +120,10 @@ class MovingParticle:
 class AngularParticle:
     def __init__(
         self,
-        pos,
-        color,
-        size,
-        speed,
+        pos: Tuple[int, int],
+        color: Union[Tuple[int, int, int], str],
+        size: Tuple[int, int],
+        speed: float,
         shape: str,
         size_reduction,
         glow: bool = False,
@@ -147,7 +149,7 @@ class AngularParticle:
         self.size_reduction = size_reduction
         self.glow = glow
 
-    def draw(self, screen, dt, speed_reduce=0):
+    def draw(self, screen: pygame.Surface, dt: float, speed_reduce=0):
         if speed_reduce:
             self.dx, self.dy = get_movement(self.angle, speed_reduce)
         self.vec[0] += self.dx * dt

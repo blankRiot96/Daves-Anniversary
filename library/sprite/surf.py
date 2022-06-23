@@ -5,6 +5,7 @@ The source code is distributed under the MIT license.
 File containing a bunch of surface manipulation
 based utility
 """
+from typing import Iterable, Tuple
 
 import pygame
 
@@ -21,7 +22,7 @@ class FadingImage:
         image: pygame.Surface,
         speed: int,
         duration: int,
-        pos: tuple[int],
+        pos: Tuple[int],
         screen: pygame.Surface,
         starting_alpha: int = 0,
         fading_in: bool = True,
@@ -89,7 +90,7 @@ class Background:
         self,
         screen: pygame.Surface,
         #             layer           speed
-        layers: list[(pygame.Surface, float)],
+        layers: Iterable[Tuple[pygame.Surface, float]],
     ):
 
         self.screen = screen
