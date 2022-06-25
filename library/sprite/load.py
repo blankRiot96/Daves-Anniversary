@@ -45,32 +45,19 @@ def get_images(
     return images
 
 
-def load_assets(state: str, screen: pygame.Surface) -> dict:
+def load_assets(state: str) -> dict:
     assets = {}
-    path = Path("assets/sprites/")
+    path = Path("assets/images/")
 
     json_files = path.rglob("*.json")
-    total_files = len(tuple(json_files))
-    loading_back_rect = pygame.Rect(
-        0, 0, screen.get_width() / 1.3, screen.get_height() / 8
-    )
-    loading_fore_rect = pygame.Rect(0, 0, 0, loading_back_rect.height)
-    total_rect_width = loading_back_rect.width
-    width_mult = total_files / total_rect_width
-    width = total_rect_width
-    loading_back_rect.center = screen.get_rect().center
-    loading_fore_rect.midleft = loading_back_rect.midleft
-    font = pygame.font.Font(None, 50)
-    loading_text = font.render("Loading...", True, (25, 25, 25))
-    r = loading_text.get_rect(midbottom=loading_back_rect.midtop)
-    for metadata_f in path.rglob("*.json"):
+    for metadata_f in json_files:
         metadata = json.loads(metadata_f.read_text())
         for file, data in metadata.items():
             if state not in data["states"]:
                 continue
 
             complete_path = metadata_f.parent / file
-            logger.info(f"Loaded {complete_path}")
+            logger.critical(f"Loaded {complete_path}")
             if data["convert_alpha"]:
                 image = pygame.image.load(complete_path).convert_alpha()
             else:
@@ -83,13 +70,5 @@ def load_assets(state: str, screen: pygame.Surface) -> dict:
 
             file_extension = file[file.find(".") :]
             assets[file.replace(file_extension, "")] = asset
-        screen.fill("black")
-        width += total_rect_width * total_files
-        # time.sleep(0.1)
-        loading_fore_rect.width = width * width_mult
-        screen.blit(loading_text, r)
-        pygame.draw.rect(screen, (25, 25, 25), loading_back_rect)
-        pygame.draw.rect(screen, "white", loading_fore_rect)
-        pygame.display.flip()
 
     return assets

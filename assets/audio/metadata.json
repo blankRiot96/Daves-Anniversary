@@ -1,0 +1,7 @@
+{
+    "explosion.wav": {
+        "volume": 0.4,
+        "states": ["level"]
+    }
+}
+

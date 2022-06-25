@@ -10,8 +10,12 @@ import pygame
 
 from game.common import HEIGHT, MAP_DIR, WIDTH, EventInfo
 from game.player import Player
+from game.sound_icon import SoundIcon
 from game.states.enums import States
+
 from library.effects import ExplosionManager
+from library.sfx import SFXManager
+from library.sprite.load import load_assets
 from library.tilemap import TileLayerMap
 from library.transition import FadeTransition
 from library.ui.buttons import Button
@@ -24,6 +28,8 @@ class InitLevelStage(abc.ABC):
         Initialize some attributes
         """
         self.camera = Camera(WIDTH, HEIGHT)
+        self.sfx_manager = SFXManager("level")
+        self.assets = load_assets("level")
         self.event_info = {}
 
 
@@ -66,7 +72,7 @@ class CameraStage(PlayerStage):
         self.camera.adjust_to(self.player.rect)
 
 
-class ButtonStage:  # Skipped for now
+class UIStage(CameraStage):  # Skipped for now
     """
     Handles buttons
     """
@@ -74,6 +80,8 @@ class ButtonStage:  # Skipped for now
     def __init__(self):
         super().__init__()
         self.buttons = ()
+
+        self.sound_icon = SoundIcon(self.sfx_manager, self.assets, center_pos=(700, 30))
 
     def update(self, event_info: EventInfo):
         """
@@ -86,6 +94,8 @@ class ButtonStage:  # Skipped for now
         for button in self.buttons:
             button.update(event_info["mouse_pos"], event_info["mouse_press"])
 
+        self.sound_icon.update(event_info)
+
     def draw(self, screen: pygame.Surface):
         """
         Draw the Button state
@@ -96,12 +106,13 @@ class ButtonStage:  # Skipped for now
         super().draw(screen)
         for button in self.buttons:
             button.draw(screen)
+        self.sound_icon.draw(screen)
 
 
-class ExplosionStage:  # Skipped for now
+class ExplosionStage(UIStage):  # Skipped for now
     def __init__(self):
         super().__init__()
-        self.explosion_manager = ExplosionManager("arcade")
+        self.explosion_manager = ExplosionManager("fire")
 
     def update(self, event_info: EventInfo) -> None:
         super().update(event_info)
@@ -110,13 +121,14 @@ class ExplosionStage:  # Skipped for now
         for event in event_info["events"]:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.explosion_manager.create_explosion(event.pos)
+                self.sfx_manager.play("explosion")
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
         self.explosion_manager.draw(screen, self.event_info["dt"])
 
 
-class TransitionStage(CameraStage):
+class TransitionStage(ExplosionStage):
     """
     Handles game state transitions
     """

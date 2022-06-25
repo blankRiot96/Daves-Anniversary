@@ -18,6 +18,7 @@ class Player:
 
     SIZE = (32, 32)
     SPEED = 2.4
+    SPACE_KEYS = pygame.K_w, pygame.K_SPACE
 
     def __init__(self):
         self.alive = True
@@ -31,6 +32,7 @@ class Player:
 
         self.vel = pygame.Vector2()
         self.gravity_acc = 0.3
+        self.touched_ground = True
 
     def handle_player_input(self, event_info: EventInfo) -> None:
         """
@@ -49,8 +51,9 @@ class Player:
 
         for event in event_info["events"]:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key in self.SPACE_KEYS and self.touched_ground:
                     self.vel.y = -9
+                    self.touched_ground = False
 
     def update(self, event_info: EventInfo, tilemap) -> None:
         """
@@ -117,6 +120,7 @@ class Player:
             if neighboring_tile.rect.colliderect(self.rect):
                 if self.vel.y > 0:
                     self.vel.y = 0
+                    self.touched_ground = True
                     self.rect.bottom = neighboring_tile.rect.top
                 elif self.vel.y < 0:
                     self.vel.y = 0

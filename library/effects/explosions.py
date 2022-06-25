@@ -71,6 +71,15 @@ class ExplosionManager:
             "glow": False,
             "size_reduction": 0.2,
         },
+        "fire": {
+            "n_particles": 500,
+            "n_size": (3, 10),
+            "speed": (1.3, 3.5),
+            "shape": "circle",
+            "color": "orange",
+            "glow": False,
+            "size_reduction": 0.2,
+        },
     }
 
     def __init__(self, exp_type: str):
