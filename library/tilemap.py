@@ -32,7 +32,7 @@ class TileLayerMap:
             surface: pygame.Surface to blit on
         """
 
-        surface.set_colorkey((0, 0, 0))
+        # surface.set_colorkey((0, 0, 0))
 
         for layer_id, layer in enumerate(self.tilemap.visible_layers):
             if isinstance(layer, pytmx.TiledTileLayer):
@@ -45,21 +45,22 @@ class TileLayerMap:
                     tile_img = self.tilemap.get_tile_image_by_gid(gid)
                     tile_instance = None
 
-                    # Construct appropriate instance based on tile type
-                    if tile_props["type"] == "tile":
-                        tile_instance = Tile(
-                            tile_img,
-                            (x * self.tilemap.tilewidth, y * self.tilemap.tileheight),
-                        )
-
-                    # Add tile instance to self.tiles
-                    self.tiles[(x, y)] = tile_instance
-
                     # Blit the tile image to surface
                     surface.blit(
                         tile_img,
                         (x * self.tilemap.tilewidth, y * self.tilemap.tileheight),
                     )
+
+                    # Construct appropriate instance based on tile type
+                    if tile_props["class"] == "tile":
+                        tile_instance = Tile(
+                            tile_img,
+                            (x * self.tilemap.tilewidth, y * self.tilemap.tileheight),
+                        )
+
+                        # Add tile instance to self.tiles
+                        self.tiles[(x, y)] = tile_instance
+
 
     def make_map(self) -> pygame.Surface:
         """
@@ -69,6 +70,6 @@ class TileLayerMap:
             A pygame.Surface to blit to the main screen
         """
 
-        temp_surface = pygame.Surface((self.width, self.height))
+        temp_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.render_map(temp_surface)
         return temp_surface

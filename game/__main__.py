@@ -4,13 +4,17 @@ The source code is distributed under the MIT license.
 """
 
 import asyncio
+import logging
 
 import pygame
 
 from game.common import HEIGHT, WIDTH
 from game.states.enums import States
 from game.states.levels import Level
+from game.states.main_menu import MainMenu
 
+
+logger = logging.getLogger()
 
 class Game:
     """
@@ -23,6 +27,8 @@ class Game:
         """
         Initialize Game class
         """
+        self.logging_config()
+
         self.alive = True
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED)
         self.state: States = States.LEVEL
@@ -30,8 +36,9 @@ class Game:
         # Dictionary to initialize respective game state
         self.perspective_states = {
             States.LEVEL: Level,
+            States.MAIN_MENU: MainMenu
         }
-        self.game_state = self.perspective_states[self.state]()
+        self.game_state = self.perspective_states[self.state]({})
         self.clock = pygame.time.Clock()
 
     def _grab_events(self):
@@ -53,6 +60,10 @@ class Game:
             "mouse_pos": mouse_pos,
             "key_press": key_press,
         }
+
+    def logging_config(self):
+        logging.basicConfig()
+        logger.setLevel("INFO")
 
     def _handle_state_switch(self):
         """
@@ -80,8 +91,10 @@ class Game:
 
             self.game_state.update(event_info)
 
-            self.screen.fill("lightblue")
+            self.screen.fill("grey19")
             self.game_state.draw(self.screen)
+
+            self._handle_state_switch()
             self.clock.tick(self.FPS_CAP)
             pygame.display.flip()
             await asyncio.sleep(0)

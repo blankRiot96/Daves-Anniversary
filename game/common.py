@@ -11,11 +11,11 @@ import typing
 EventInfo = typing.Dict[str, typing.Any]
 
 # Game stuff
-WIDTH = 800
-HEIGHT = 450
+WIDTH = 400
+HEIGHT = 230
 
-TILE_WIDTH = 32
-TILE_HEIGHT = 32
+TILE_WIDTH = 16
+TILE_HEIGHT = 16
 
 # Paths
 ROOT_DIR = pathlib.Path(".")

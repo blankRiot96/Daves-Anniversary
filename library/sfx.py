@@ -34,7 +34,7 @@ def load_sfx(state: str) -> dict:
                 continue
 
             complete_path = metadata_f.parent / file
-            logger.critical(f"Loaded {complete_path}")
+            logger.info(f"Loaded {complete_path}")
 
             sound = pygame.mixer.Sound(complete_path)
 
