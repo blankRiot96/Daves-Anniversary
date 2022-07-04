@@ -4,6 +4,7 @@ The source code is distributed under the MIT license.
 """
 
 import abc
+from asyncio.log import logger
 from typing import Optional
 
 import pygame
@@ -12,7 +13,6 @@ from game.common import HEIGHT, MAP_DIR, WIDTH, EventInfo
 from game.player import Player
 from game.sound_icon import SoundIcon
 from game.states.enums import States
-
 from library.effects import ExplosionManager
 from library.sfx import SFXManager
 from library.sprite.load import load_assets
@@ -23,7 +23,8 @@ from library.ui.camera import Camera
 
 
 class InitLevelStage(abc.ABC):
-    def __init__(self) -> None:
+    def __init__(self, switch_info: dict) -> None:
+        self.switch_info = switch_info
         """
         Initialize some attributes
         """
@@ -38,9 +39,9 @@ class TileStage(InitLevelStage):
     Handles tilemap rendering
     """
 
-    def __init__(self):
-        super().__init__()
-        self.tilemap = TileLayerMap(MAP_DIR / "placeholder_map.tmx")
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        self.tilemap = TileLayerMap(MAP_DIR / "dimension_one.tmx")
 
         self.map_surf = self.tilemap.make_map()
 
@@ -53,13 +54,17 @@ class PlayerStage(TileStage):
     Handle player related actions
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
         self.player = Player()
 
     def update(self, event_info: EventInfo):
         self.player.update(event_info, self.tilemap)
         self.event_info = event_info
+
+        # Temporary checking here 
+        if self.player.y > 2000:
+            self.player.alive = False
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
@@ -77,8 +82,8 @@ class UIStage(CameraStage):  # Skipped for now
     Handles buttons
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
         self.buttons = ()
 
         self.sound_icon = SoundIcon(self.sfx_manager, self.assets, center_pos=(700, 30))
@@ -110,8 +115,8 @@ class UIStage(CameraStage):  # Skipped for now
 
 
 class ExplosionStage(UIStage):  # Skipped for now
-    def __init__(self):
-        super().__init__()
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
         self.explosion_manager = ExplosionManager("fire")
 
     def update(self, event_info: EventInfo) -> None:
@@ -134,9 +139,9 @@ class TransitionStage(ExplosionStage):
     """
 
     FADE_SPEED = 4
-
-    def __init__(self):
-        super().__init__()
+    
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
         self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
         self.next_state: Optional[States] = None
 

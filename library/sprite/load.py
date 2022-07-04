@@ -57,7 +57,7 @@ def load_assets(state: str) -> dict:
                 continue
 
             complete_path = metadata_f.parent / file
-            logger.critical(f"Loaded {complete_path}")
+            logger.info(f"Loaded {complete_path}")
             if data["convert_alpha"]:
                 image = pygame.image.load(complete_path).convert_alpha()
             else:

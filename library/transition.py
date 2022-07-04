@@ -9,6 +9,7 @@ import pygame
 class FadeTransition:
     def __init__(self, fade_in: bool, fade_speed: float, size: tuple[int, int]):
         self.fade_in = fade_in
+        self.init_fade = fade_in
         self.fade_speed = fade_speed
         self.image = pygame.Surface(size)
 
@@ -22,14 +23,17 @@ class FadeTransition:
             self.event = False
         else:
             self.alpha = 0
-            self.event = True
-
+            if not self.init_fade:
+                self.event = True
+                
     def _handle_fade_out(self, dt: float):
         if self.alpha < 255:
             self.alpha += self.fade_speed * dt
             self.event = False
         else:
-            self.event = True
+            self.alpha = 255
+            if self.init_fade:
+                self.event = True
 
     def update(self, dt: float) -> None:
         if self.fade_in:

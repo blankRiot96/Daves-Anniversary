@@ -16,7 +16,7 @@ class Player:
     Handles player
     """
 
-    SIZE = (32, 32)
+    SIZE = (16, 16)
     SPEED = 2.4
     SPACE_KEYS = pygame.K_w, pygame.K_SPACE
 
