@@ -43,7 +43,8 @@ class Game:
         Return window events
         """
         raw_dt = self.clock.get_time() / 1000
-        dt = raw_dt * 100
+        # capping delta time to avoid bugs when moving the window
+        dt = min(raw_dt * 100, 10)
         events = pygame.event.get()
         mouse_press = pygame.mouse.get_pressed()
         mouse_pos = pygame.mouse.get_pos()
