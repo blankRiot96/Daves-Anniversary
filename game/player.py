@@ -7,7 +7,10 @@ import typing
 import pygame
 
 from game.common import EventInfo
+from game.entity import EntityStates
 from game.utils import get_neighboring_tiles, pixel_to_tile
+from library.utils.animation import Animation
+from library.utils.funcs import flip_images
 
 
 # TODO: Make Player a pygame.sprite.Sprite
@@ -16,14 +19,25 @@ class Player:
     Handles player
     """
 
-    SIZE = (16, 16)
-    SPEED = 2.4
+    SIZE = (10, 16)
+    WALK_ANIM_SPEED = 0.05
+    SPEED = 0.7
     SPACE_KEYS = pygame.K_w, pygame.K_SPACE
 
-    def __init__(self):
+    def __init__(self, walk_frames: typing.List[pygame.Surface]):
         self.alive = True
-        self.image = pygame.Surface(self.SIZE)
-        self.image.fill("red")
+
+        # self.image = pygame.Surface(self.SIZE)
+        # self.image.fill("red")
+
+        self.animations = {
+            "walk_right": Animation(walk_frames, self.WALK_ANIM_SPEED),
+            "walk_left": Animation(flip_images(walk_frames), self.WALK_ANIM_SPEED),
+        }
+        # can be "right" or "left"
+        self.facing = "right"
+        self.state = EntityStates.IDLE
+
         self.rect = pygame.Rect((0, 0), self.SIZE)
 
         self.x, self.y = 0, 0
@@ -44,16 +58,25 @@ class Player:
 
         dt = event_info["dt"]
         keys = event_info["key_press"]
+        self.state = EntityStates.IDLE
         if keys[pygame.K_d]:
             self.vel.x = self.SPEED * dt
+            self.state = EntityStates.WALK
+            self.facing = "right"
         if keys[pygame.K_a]:
             self.vel.x = -self.SPEED * dt
+            self.state = EntityStates.WALK
+            self.facing = "left"
 
         for event in event_info["events"]:
             if event.type == pygame.KEYDOWN:
                 if event.key in self.SPACE_KEYS and self.touched_ground:
                     self.vel.y = -9
                     self.touched_ground = False
+
+        # if we are in the air
+        if not self.touched_ground:
+            self.state = EntityStates.JUMP
 
     def update(self, event_info: EventInfo, tilemap) -> None:
         """
@@ -83,16 +106,21 @@ class Player:
         self.y = self.rect.y
         self.tile_vec = pixel_to_tile(self.vec)
 
-    def draw(self, screen: pygame.Surface, camera) -> None:
+    def draw(self, dt: float, screen: pygame.Surface, camera) -> None:
         """
         Draws the player
 
         Parameters:
+            dt: the deltatime for framerate independent movement
             screen: pygame.Surface to draw player on
             camera: camera.Camera to adjust position
         """
+        animation = self.animations[f"walk_{self.facing}"]
 
-        screen.blit(self.image, camera.apply(self.vec))
+        if self.state == EntityStates.WALK:
+            animation.play(screen, camera.apply(self.vec).topleft, dt)
+        else:
+            screen.blit(animation.frames[0], camera.apply(self.vec))
 
     def handle_tile_collisions(
         self, dt: float, neighboring_tiles: typing.List[typing.Any]

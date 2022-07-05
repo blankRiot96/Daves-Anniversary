@@ -3,14 +3,14 @@ This file is a part of the 'Unnamed' source code.
 The source code is distributed under the MIT license.
 """
 
+from typing import Optional
+
 import pygame
 
-
+from game.common import HEIGHT, WIDTH, EventInfo
+from game.states.enums import States
 from library.sfx import SFXManager
 from library.transition import FadeTransition
-from game.common import WIDTH, HEIGHT, EventInfo
-from game.states.enums import States
-from typing import Optional
 
 
 class InitMainMenuStage:

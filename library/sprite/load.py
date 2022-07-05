@@ -16,6 +16,7 @@ logger = logging.getLogger()
 def get_images(
     sheet: pygame.Surface,
     size: Tuple[int],
+    bound=False,
 ):
     """
     Converts a sprite sheet to a list of surfaces

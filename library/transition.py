@@ -25,7 +25,7 @@ class FadeTransition:
             self.alpha = 0
             if not self.init_fade:
                 self.event = True
-                
+
     def _handle_fade_out(self, dt: float):
         if self.alpha < 255:
             self.alpha += self.fade_speed * dt
