@@ -30,7 +30,6 @@ class Game:
         self.logging_config()
 
         self.alive = True
-        self.debug = False
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED)
         self.state: States = States.LEVEL
 
