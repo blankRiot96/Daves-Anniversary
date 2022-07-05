@@ -74,7 +74,7 @@ class PlayerStage(TileStage):
 class CameraStage(PlayerStage):
     def update(self, event_info: EventInfo):
         super().update(event_info)
-        self.camera.adjust_to(self.player.rect)
+        self.camera.adjust_to(self.event_info["dt"], self.player.rect)
 
 
 class UIStage(CameraStage):  # Skipped for now
