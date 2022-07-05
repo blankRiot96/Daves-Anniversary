@@ -62,7 +62,7 @@ class PlayerStage(TileStage):
         self.player.update(event_info, self.tilemap)
         self.event_info = event_info
 
-        # Temporary checking here 
+        # Temporary checking here
         if self.player.y > 2000:
             self.player.alive = False
 
@@ -139,7 +139,7 @@ class TransitionStage(ExplosionStage):
     """
 
     FADE_SPEED = 4
-    
+
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))

@@ -61,7 +61,6 @@ class TileLayerMap:
                         # Add tile instance to self.tiles
                         self.tiles[(x, y)] = tile_instance
 
-
     def make_map(self) -> pygame.Surface:
         """
         Makes a pygame.Surface, then render the map and return the rendered map

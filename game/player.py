@@ -7,10 +7,10 @@ import typing
 import pygame
 
 from game.common import EventInfo
-from game.utils import get_neighboring_tiles, pixel_to_tile
-from library.utils.funcs import flip_images
 from game.entity import EntityStates
+from game.utils import get_neighboring_tiles, pixel_to_tile
 from library.utils.animation import Animation
+from library.utils.funcs import flip_images
 
 
 # TODO: Make Player a pygame.sprite.Sprite
@@ -30,7 +30,10 @@ class Player:
         # self.image = pygame.Surface(self.SIZE)
         # self.image.fill("red")
 
-        self.animations = {"walk_right": Animation(walk_frames, self.WALK_ANIM_SPEED), "walk_left": Animation(flip_images(walk_frames), self.WALK_ANIM_SPEED)}
+        self.animations = {
+            "walk_right": Animation(walk_frames, self.WALK_ANIM_SPEED),
+            "walk_left": Animation(flip_images(walk_frames), self.WALK_ANIM_SPEED),
+        }
         # can be "right" or "left"
         self.facing = "right"
         self.state = EntityStates.IDLE
@@ -70,7 +73,7 @@ class Player:
                 if event.key in self.SPACE_KEYS and self.touched_ground:
                     self.vel.y = -9
                     self.touched_ground = False
-        
+
         # if we are in the air
         if not self.touched_ground:
             self.state = EntityStates.JUMP
@@ -118,7 +121,6 @@ class Player:
             animation.play(screen, camera.apply(self.vec).topleft, dt)
         else:
             screen.blit(animation.frames[0], camera.apply(self.vec))
-
 
     def handle_tile_collisions(
         self, dt: float, neighboring_tiles: typing.List[typing.Any]
