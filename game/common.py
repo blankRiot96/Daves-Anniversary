@@ -11,8 +11,8 @@ import typing
 EventInfo = typing.Dict[str, typing.Any]
 
 # Game stuff
-WIDTH = 400
-HEIGHT = 230
+WIDTH = 600
+HEIGHT = 320
 
 TILE_WIDTH = 16
 TILE_HEIGHT = 16

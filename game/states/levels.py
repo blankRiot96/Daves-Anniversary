@@ -56,7 +56,7 @@ class PlayerStage(TileStage):
 
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-        self.player = Player()
+        self.player = Player(self.assets["dave_walk"])
 
     def update(self, event_info: EventInfo):
         self.player.update(event_info, self.tilemap)
@@ -68,7 +68,7 @@ class PlayerStage(TileStage):
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
-        self.player.draw(screen, self.camera)
+        self.player.draw(self.event_info["dt"], screen, self.camera)
 
 
 class CameraStage(PlayerStage):

@@ -1,0 +1,10 @@
+{
+    "dave_walk.png": {
+        "sprite_sheet": {
+            "size": [10, 16],
+            "bound": false
+        },
+        "convert_alpha": true,
+        "states": ["level"]
+    }
+}
