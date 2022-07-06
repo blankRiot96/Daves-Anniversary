@@ -21,7 +21,7 @@ class Player:
 
     SIZE = (10, 16)
     WALK_ANIM_SPEED = 0.05
-    SPEED = 0.7
+    SPEED = 1
     SPACE_KEYS = pygame.K_w, pygame.K_SPACE
 
     def __init__(self, walk_frames: typing.List[pygame.Surface]):
@@ -94,11 +94,12 @@ class Player:
         dt = event_info["dt"]
         self.handle_player_input(event_info)
         self.handle_tile_collisions(
-            dt, get_neighboring_tiles(tilemap, 1, self.tile_vec)
+            dt, get_neighboring_tiles(tilemap, 5, self.tile_vec)
         )
 
-        # Add gravity
+        # Add and cap gravity
         self.vel.y += self.gravity_acc * dt
+        self.vel.y = min(9, self.vel.y)
 
         # Update position attributes to rect.topleft
         self.vec.x, self.vec.y = self.rect.topleft
