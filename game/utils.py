@@ -2,6 +2,8 @@
 This file is a part of the 'Unnamed' source code.
 The source code is distributed under the MIT license.
 """
+import json
+import pathlib
 import typing
 
 import pygame
@@ -70,3 +72,10 @@ def get_neighboring_tiles(
             neighboring_tile_entities.append(tile)
 
     return neighboring_tile_entities
+
+
+def load_settings(path: pathlib.Path) -> dict:
+    with open(path) as f:
+        settings = json.load(f)
+    
+    return settings
