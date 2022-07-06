@@ -35,18 +35,21 @@ class Camera:
         elif isinstance(target_pos, pygame.Vector2):
             target_pos = pygame.Rect(target_pos.x, target_pos.y, 0, 0)
 
-        return target_pos.move(self.camera.topleft)
+        return target_pos.move((-self.camera.x, -self.camera.y))
 
-    def adjust_to(self, target_pos: pygame.Vector2) -> None:
+    def adjust_to(self, dt: float, target_pos: pygame.Vector2) -> None:
         """
-        Adjusts the camera pos to the target pos
+        Smoothly adjusts the camera pos to the target pos
 
         Parameters:
+            dt: deltatime
             target_pos: the target position to adjust to
         """
 
-        x = self.camera_width // 2 - target_pos.x
-        y = self.camera_height // 2 - target_pos.y
+        self.camera.x += (
+            dt * (target_pos.x - self.camera.x - self.camera_width // 2) // 26
+        )
 
-        self.camera.topleft = (x, y)
-        self.vec = (x, y)
+        self.camera.y += (
+            dt * (target_pos.y - self.camera.y - self.camera_height // 2) // 26
+        )
