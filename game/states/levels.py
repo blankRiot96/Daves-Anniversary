@@ -4,15 +4,17 @@ The source code is distributed under the MIT license.
 """
 
 import abc
+import json
 from asyncio.log import logger
 from typing import Optional
 
 import pygame
 
-from game.common import HEIGHT, MAP_DIR, WIDTH, EventInfo
+from game.common import HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH, EventInfo
 from game.player import Player
 from game.sound_icon import SoundIcon
-from game.states.enums import States
+from game.states.enums import States, Dimensions
+from game.utils import load_settings
 from library.effects import ExplosionManager
 from library.sfx import SFXManager
 from library.sprite.load import load_assets
@@ -25,6 +27,7 @@ from library.ui.camera import Camera
 class InitLevelStage(abc.ABC):
     def __init__(self, switch_info: dict) -> None:
         self.switch_info = switch_info
+        self.current_dimension = Dimensions.PARALLEL_DIMENSION
         """
         Initialize some attributes
         """
@@ -32,6 +35,8 @@ class InitLevelStage(abc.ABC):
         self.sfx_manager = SFXManager("level")
         self.assets = load_assets("level")
         self.event_info = {}
+
+        self.settings = load_settings(SETTINGS_DIR / f"{self.current_dimension.value}.json")
 
 
 class TileStage(InitLevelStage):
@@ -41,6 +46,7 @@ class TileStage(InitLevelStage):
 
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
+        # self.tilemap = TileLayerMap(MAP_DIR / f"{self.current_dimension.value}.tmx")
         self.tilemap = TileLayerMap(MAP_DIR / "dimension_one.tmx")
 
         self.map_surf = self.tilemap.make_map()
@@ -56,7 +62,8 @@ class PlayerStage(TileStage):
 
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-        self.player = Player(self.assets["dave_walk"])
+
+        self.player = Player(self.settings, self.assets["dave_walk"])
 
     def update(self, event_info: EventInfo):
         self.player.update(event_info, self.tilemap)

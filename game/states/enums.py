@@ -13,3 +13,12 @@ class States(enum.Enum):
 
     MAIN_MENU = "main menu"
     LEVEL = "level"
+
+
+class Dimensions(enum.Enum):
+    """
+    Enum for dimensions
+    """
+
+    PARALLEL_DIMENSION = "dimension_one"
+    INVERTED_DIMENSION = "dimension_two"
