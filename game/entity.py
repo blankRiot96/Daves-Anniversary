@@ -68,7 +68,7 @@ class Entity(abc.ABC):
     @property
     def x(self):
         return self.vec.x
-    
+
     @property
     def y(self):
         return self.vec.y
@@ -80,7 +80,6 @@ class Entity(abc.ABC):
     @abc.abstractmethod
     def draw(self, dt: float, screen: pygame.Surface, camera) -> None:
         pass
-
 
 
 class EntityStates(enum.Enum):

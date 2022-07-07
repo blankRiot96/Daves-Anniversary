@@ -13,8 +13,9 @@ import pygame
 from game.common import HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH, EventInfo
 from game.enemy import MovingWall
 from game.player import Player
+from game.portal import Portal
 from game.sound_icon import SoundIcon
-from game.states.enums import States, Dimensions
+from game.states.enums import Dimensions, States
 from game.utils import load_settings
 from library.effects import ExplosionManager
 from library.sfx import SFXManager
@@ -23,7 +24,6 @@ from library.tilemap import TileLayerMap
 from library.transition import FadeTransition
 from library.ui.buttons import Button
 from library.ui.camera import Camera
-from game.portal import Portal
 
 
 class InitLevelStage(abc.ABC):
@@ -39,12 +39,24 @@ class InitLevelStage(abc.ABC):
         self.event_info = {}
 
         self.settings = {
-            "parallel_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.PARALLEL_DIMENSION.value}.json"),
-            "alien_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.ALIEN_DIMENSION.value}.json"),
-            "volcanic_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.VOLCANIC_DIMENSION.value}.json"),
-            "water_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.WATER_DIMENSION.value}.json"),
-            "moon_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.MOON_DIMENSION.value}.json"),
-            "homeland_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.HOMELAND_DIMENSION.value}.json"),
+            "parallel_dimension": load_settings(
+                SETTINGS_DIR / f"{Dimensions.PARALLEL_DIMENSION.value}.json"
+            ),
+            "alien_dimension": load_settings(
+                SETTINGS_DIR / f"{Dimensions.ALIEN_DIMENSION.value}.json"
+            ),
+            "volcanic_dimension": load_settings(
+                SETTINGS_DIR / f"{Dimensions.VOLCANIC_DIMENSION.value}.json"
+            ),
+            "water_dimension": load_settings(
+                SETTINGS_DIR / f"{Dimensions.WATER_DIMENSION.value}.json"
+            ),
+            "moon_dimension": load_settings(
+                SETTINGS_DIR / f"{Dimensions.MOON_DIMENSION.value}.json"
+            ),
+            "homeland_dimension": load_settings(
+                SETTINGS_DIR / f"{Dimensions.HOMELAND_DIMENSION.value}.json"
+            ),
         }
         self.enemies = set()
         self.portals = set()
@@ -64,7 +76,9 @@ class TileStage(InitLevelStage):
 
         for enemy_obj in self.tilemap.tilemap.get_layer_by_name("enemies"):
             if enemy_obj.name == "moving_wall":
-                self.enemies.add(MovingWall(self.settings[self.current_dimension.value], enemy_obj))
+                self.enemies.add(
+                    MovingWall(self.settings[self.current_dimension.value], enemy_obj)
+                )
 
     def draw(self, screen: pygame.Surface):
         screen.blit(self.map_surf, self.camera.apply((0, 0)))
@@ -78,7 +92,9 @@ class PlayerStage(TileStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
 
-        self.player = Player(self.settings[self.current_dimension.value], self.assets["dave_walk"])
+        self.player = Player(
+            self.settings[self.current_dimension.value], self.assets["dave_walk"]
+        )
 
     def update(self, event_info: EventInfo):
         self.player.update(event_info, self.tilemap, self.enemies)
@@ -133,7 +149,7 @@ class EnemyStage(PortalStage):
 
         for enemy in self.enemies:
             enemy.update(event_info, self.tilemap, self.player)
-    
+
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
 
