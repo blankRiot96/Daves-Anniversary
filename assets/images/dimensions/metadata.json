@@ -1,0 +1,27 @@
+{
+    "parallel_dimension.png": {
+        "sprite_sheet": {
+            "size": [16, 16],
+            "bound": false
+        },
+        "convert_alpha": true,
+        "states": ["level"]
+    },
+    "volcanic_dimension.png": {
+        "sprite_sheet": {
+            "size": [16, 16],
+            "bound": false
+        },
+        "convert_alpha": true,
+        "states": ["level"]
+    },
+    "alien_dimension.png": {
+        "sprite_sheet": {
+            "size": [16, 16],
+            "bound": false
+        },
+        "convert_alpha": true,
+        "states": ["level"]
+    }
+}
+

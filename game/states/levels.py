@@ -4,8 +4,7 @@ The source code is distributed under the MIT license.
 """
 
 import abc
-import json
-from asyncio.log import logger
+import logging
 from typing import Optional
 
 import pygame
@@ -24,6 +23,9 @@ from library.tilemap import TileLayerMap
 from library.transition import FadeTransition
 from library.ui.buttons import Button
 from library.ui.camera import Camera
+
+
+logger = logging.getLogger()
 
 
 class InitLevelStage(abc.ABC):
@@ -48,15 +50,15 @@ class InitLevelStage(abc.ABC):
             "volcanic_dimension": load_settings(
                 SETTINGS_DIR / f"{Dimensions.VOLCANIC_DIMENSION.value}.json"
             ),
-            "water_dimension": load_settings(
-                SETTINGS_DIR / f"{Dimensions.WATER_DIMENSION.value}.json"
-            ),
-            "moon_dimension": load_settings(
-                SETTINGS_DIR / f"{Dimensions.MOON_DIMENSION.value}.json"
-            ),
-            "homeland_dimension": load_settings(
-                SETTINGS_DIR / f"{Dimensions.HOMELAND_DIMENSION.value}.json"
-            ),
+            # "water_dimension": load_settings(
+            #     SETTINGS_DIR / f"{Dimensions.WATER_DIMENSION.value}.json"
+            # ),
+            # "moon_dimension": load_settings(
+            #     SETTINGS_DIR / f"{Dimensions.MOON_DIMENSION.value}.json"
+            # ),
+            # "homeland_dimension": load_settings(
+            #     SETTINGS_DIR / f"{Dimensions.HOMELAND_DIMENSION.value}.json"
+            # ),
         }
         self.enemies = set()
         self.portals = set()
@@ -79,6 +81,10 @@ class TileStage(InitLevelStage):
                 self.enemies.add(
                     MovingWall(self.settings[self.current_dimension.value], enemy_obj)
                 )
+        
+        self.tilesets = {
+            enm: self.assets[enm.value] for enm in Dimensions
+        }
 
     def draw(self, screen: pygame.Surface):
         screen.blit(self.map_surf, self.camera.apply((0, 0)))
@@ -116,6 +122,7 @@ class PortalStage(PlayerStage):
         for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
             if portal_obj.name == "portal":
                 self.portals.add(Portal(portal_obj, [enm for enm in Dimensions]))
+        
 
     def update(self, event_info: EventInfo):
         super().update(event_info)
@@ -128,6 +135,8 @@ class PortalStage(PlayerStage):
             # otherwise (if we're switching dimension)
             else:
                 self.current_dimension = portal.current_dimension
+                self.map_surf = self.tilemap.make_map(self.tilesets[self.current_dimension])
+
                 # change player's settings
                 self.player.change_settings(self.settings[self.current_dimension.value])
                 # change enemy settings
@@ -135,6 +144,7 @@ class PortalStage(PlayerStage):
                     enemy.change_settings(self.settings[self.current_dimension.value])
 
             portal.update(self.player, event_info)
+
 
     def draw(self, screen: pygame.Surface):
         for portal in self.portals:
