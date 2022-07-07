@@ -5,10 +5,11 @@ The source code is distributed under the MIT license.
 import json
 import pathlib
 import typing
+from functools import lru_cache
 
 import pygame
 
-from game.common import TILE_HEIGHT, TILE_WIDTH
+from game.common import TILE_HEIGHT, TILE_WIDTH, FONT_DIR
 from library.tilemap import TileLayerMap
 
 
@@ -85,6 +86,11 @@ def load_settings(path: pathlib.Path) -> dict:
         settings = json.load(f)
 
     return settings
+
+
+@lru_cache(maxsize=512)
+def load_font(size: int, font_path=FONT_DIR / "PixelMillenium.ttf"):
+    return pygame.font.Font(font_path, size)
 
 
 def string_pos_to_tuple(string: str) -> tuple:

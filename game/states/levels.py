@@ -16,8 +16,9 @@ from game.player import Player
 from game.portal import Portal
 from game.sound_icon import SoundIcon
 from game.states.enums import Dimensions, States
-from game.utils import load_settings
+from game.utils import load_settings, load_font
 from library.effects import ExplosionManager
+from library.particles import ParticleManager, TextParticle
 from library.sfx import SFXManager
 from library.sprite.load import load_assets
 from library.tilemap import TileLayerMap
@@ -60,6 +61,7 @@ class InitLevelStage(abc.ABC):
         }
         self.enemies = set()
         self.portals = set()
+        self.particle_manager = ParticleManager(self.camera)
 
 
 class TileStage(InitLevelStage):
@@ -127,6 +129,8 @@ class PortalStage(PlayerStage):
                 portal.current_dimension = self.current_dimension
             # otherwise (if we're switching dimension)
             else:
+                print(f"Changed dimension to: {portal.current_dimension}")
+
                 self.current_dimension = portal.current_dimension
                 # change player's settings
                 self.player.change_settings(self.settings[self.current_dimension.value])
@@ -138,6 +142,21 @@ class PortalStage(PlayerStage):
 
     def draw(self, screen: pygame.Surface):
         for portal in self.portals:
+            if portal.dimension_change:
+                font = load_font(8)
+                formatted_txt = portal.current_dimension.value.replace('_', ' ').title()
+
+                self.particle_manager.add(
+                    TextParticle(
+                        screen=screen,
+                        image=font.render(f"Switched to: {formatted_txt}", True, (255, 255, 255)),
+                        pos=self.player.vec,
+                        vel=(0, -1.5),
+                        alpha_speed=3,
+                        lifespan=60
+                    )
+                )
+
             portal.draw(screen, self.camera)
 
         super().draw(screen)
@@ -187,6 +206,7 @@ class UIStage(CameraStage):  # Skipped for now
             button.update(event_info["mouse_pos"], event_info["mouse_press"])
 
         self.sound_icon.update(event_info)
+        self.particle_manager.update(event_info)
 
     def draw(self, screen: pygame.Surface):
         """
@@ -199,6 +219,7 @@ class UIStage(CameraStage):  # Skipped for now
         for button in self.buttons:
             button.draw(screen)
         self.sound_icon.draw(screen)
+        self.particle_manager.draw()
 
 
 class ExplosionStage(UIStage):  # Skipped for now
