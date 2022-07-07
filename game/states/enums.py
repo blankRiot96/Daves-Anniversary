@@ -20,5 +20,9 @@ class Dimensions(enum.Enum):
     Enum for dimensions
     """
 
-    PARALLEL_DIMENSION = "dimension_one"
-    INVERTED_DIMENSION = "dimension_two"
+    PARALLEL_DIMENSION = "parallel_dimension"
+    ALIEN_DIMENSION = "alien_dimension"
+    VOLCANIC_DIMENSION = "volcanic_dimension"
+    WATER_DIMENSION = "water_dimension"
+    MOON_DIMENSION = "moon_dimension"
+    HOMELAND_DIMENSION = "homeland_dimension"

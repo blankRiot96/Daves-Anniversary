@@ -1,0 +1,5 @@
+{
+    "gravity": 0.1,
+    "player_speed": 1,
+    "player_jump": -7
+}

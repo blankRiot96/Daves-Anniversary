@@ -25,6 +25,8 @@ class Player(Entity):
 
     def __init__(self, settings: dict, walk_frames: typing.List[pygame.Surface]):
         super().__init__(settings)
+        # set player stats
+        self.change_settings(settings)
 
         self.alive = True
         self.animations = {
@@ -35,6 +37,11 @@ class Player(Entity):
         self.jump_height = settings["player_jump"]
 
         self.rect = pygame.Rect((0, 0), self.SIZE)
+
+    def change_settings(self, settings: dict) -> None:
+        self.speed = settings["player_speed"]
+        self.jump_height = settings["player_jump"]
+        self.gravity_acc = settings["gravity"]
 
     def handle_player_input(self, event_info: EventInfo) -> None:
         """

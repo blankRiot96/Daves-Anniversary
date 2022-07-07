@@ -23,6 +23,7 @@ from library.tilemap import TileLayerMap
 from library.transition import FadeTransition
 from library.ui.buttons import Button
 from library.ui.camera import Camera
+from game.portal import Portal
 
 
 class InitLevelStage(abc.ABC):
@@ -37,8 +38,16 @@ class InitLevelStage(abc.ABC):
         self.assets = load_assets("level")
         self.event_info = {}
 
-        self.settings = load_settings(SETTINGS_DIR / f"{self.current_dimension.value}.json")
+        self.settings = {
+            "parallel_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.PARALLEL_DIMENSION.value}.json"),
+            "alien_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.ALIEN_DIMENSION.value}.json"),
+            "volcanic_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.VOLCANIC_DIMENSION.value}.json"),
+            "water_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.WATER_DIMENSION.value}.json"),
+            "moon_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.MOON_DIMENSION.value}.json"),
+            "homeland_dimension": load_settings(SETTINGS_DIR / f"{Dimensions.HOMELAND_DIMENSION.value}.json"),
+        }
         self.enemies = set()
+        self.portals = set()
 
 
 class TileStage(InitLevelStage):
@@ -55,7 +64,7 @@ class TileStage(InitLevelStage):
 
         for enemy_obj in self.tilemap.tilemap.get_layer_by_name("enemies"):
             if enemy_obj.name == "moving_wall":
-                self.enemies.add(MovingWall(self.settings, enemy_obj))
+                self.enemies.add(MovingWall(self.settings[self.current_dimension.value], enemy_obj))
 
     def draw(self, screen: pygame.Surface):
         screen.blit(self.map_surf, self.camera.apply((0, 0)))
@@ -69,7 +78,7 @@ class PlayerStage(TileStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
 
-        self.player = Player(self.settings, self.assets["dave_walk"])
+        self.player = Player(self.settings[self.current_dimension.value], self.assets["dave_walk"])
 
     def update(self, event_info: EventInfo):
         self.player.update(event_info, self.tilemap, self.enemies)
@@ -83,7 +92,42 @@ class PlayerStage(TileStage):
         super().draw(screen)
         self.player.draw(self.event_info["dt"], screen, self.camera)
 
-class EnemyStage(PlayerStage):
+
+class PortalStage(PlayerStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+
+        for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
+            if portal_obj.name == "portal":
+                self.portals.add(Portal(portal_obj, [enm for enm in Dimensions]))
+
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+
+        for portal in self.portals:
+            # if we aren't changing the dimension,
+            # we have to reset portal's dimension to the current one
+            if not portal.dimension_change:
+                portal.current_dimension = self.current_dimension
+            # otherwise (if we're switching dimension)
+            else:
+                self.current_dimension = portal.current_dimension
+                # change player's settings
+                self.player.change_settings(self.settings[self.current_dimension.value])
+                # change enemy settings
+                for enemy in self.enemies:
+                    enemy.change_settings(self.settings[self.current_dimension.value])
+
+            portal.update(self.player, event_info)
+
+    def draw(self, screen: pygame.Surface):
+        for portal in self.portals:
+            portal.draw(screen, self.camera)
+
+        super().draw(screen)
+
+
+class EnemyStage(PortalStage):
     def update(self, event_info: EventInfo):
         super().update(event_info)
 
@@ -100,7 +144,8 @@ class EnemyStage(PlayerStage):
 class CameraStage(EnemyStage):
     def update(self, event_info: EventInfo):
         super().update(event_info)
-        self.camera.adjust_to(self.event_info["dt"], self.player.rect)
+
+        self.camera.adjust_to(event_info["dt"], self.player.rect)
 
 
 class UIStage(CameraStage):  # Skipped for now
