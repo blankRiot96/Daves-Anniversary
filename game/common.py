@@ -22,5 +22,6 @@ ROOT_DIR = pathlib.Path(".")
 ASSETS_DIR = ROOT_DIR / "assets"
 DATA_DIR = ASSETS_DIR / "data"
 MAP_DIR = ASSETS_DIR / "maps"
+FONT_DIR = ASSETS_DIR / "fonts"
 
 SETTINGS_DIR = DATA_DIR / "settings"

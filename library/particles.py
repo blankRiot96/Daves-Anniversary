@@ -9,7 +9,31 @@ from typing import Tuple, Union
 
 import pygame
 
+from game.common import EventInfo
+
 from library.utils.funcs import circle_surf, get_movement
+
+
+class ParticleManager(set):
+    def __init__(self, camera, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.camera = camera
+
+    def update(self, event_info: EventInfo) -> None:
+        dead_particles = set()
+
+        for particle in self:
+            particle.update(event_info["dt"])
+
+            if not particle.alive:
+                dead_particles.add(particle)
+
+        self.difference_update(dead_particles)
+
+    def draw(self) -> None:
+        for particle in self:
+            particle.draw(self.camera)
 
 
 class Particle:
@@ -26,6 +50,7 @@ class Particle:
         vel: tuple[int] = (-0.5, 0.1),
         gravity: float = 0.1,
         color: Union[Tuple[int, int, int], str] = "white",
+        lifespan: int = 0
     ):
         """
         Parameters:
@@ -44,17 +69,22 @@ class Particle:
         self.vel.y = -self.vel.y
         self.gravity = gravity
         self.color = color
+        self.lifespan = lifespan
+        self.current_lifespan = 0
+        self.alive = True
 
-    def draw(self, scroll: pygame.Vector2):
+    def draw(self, camera):
         """
         Draws the particle on a pygame.Surface.
         """
-        pygame.draw.circle(self.screen, self.color, self.pos - scroll, self.radius)
+        pygame.draw.circle(self.screen, self.color, camera.apply(self.pos), self.radius)
 
-    def update(self, scroll: pygame.Vector2, delta_time: float):
+    def update(self, delta_time: float):
         """
         Updates the particle.
         """
+
+        self.current_lifespan += 1
 
         # increase vel.y so particle goes down exponentially
         self.vel.y += self.gravity * delta_time
@@ -66,8 +96,8 @@ class Particle:
         # decrease the radius
         self.radius -= self.radius_speed * delta_time
 
-        # draw the particle
-        self.draw(scroll)
+        if self.current_lifespan > self.lifespan or self.radius <= 0:
+            self.alive = False
 
 
 class MovingParticle:
@@ -84,6 +114,7 @@ class MovingParticle:
         vel: Tuple[int],
         alpha_speed: int,
         starting_alpha: int = 255,
+        lifespan: int = 0
     ):
         """
         Parameters:
@@ -100,21 +131,42 @@ class MovingParticle:
         self.pos = pygame.Vector2(pos)
         self.vel = pygame.Vector2(vel)
         self.alpha_speed = alpha_speed
+        self.lifespan = lifespan
+        self.current_lifespan = 0
+        self.alive = True
 
-    def update(self, scroll: pygame.Vector2, delta_time: float):
+    def update(self, delta_time: float):
         """
         Updates the particle
         Parameters:
                 scroll: World scroll
                 delta_time: Time between frames
         """
+
+        self.current_lifespan += 1
+
         self.pos.x += self.vel.x * delta_time
         self.pos.y += self.vel.y * delta_time
 
         self.alpha -= self.alpha_speed * delta_time
         self.image.set_alpha(self.alpha)
 
-        self.screen.blit(self.image, self.pos - scroll)
+        if self.current_lifespan > self.lifespan or self.alpha == 0:
+            self.alive = False
+
+    def draw(self, camera):
+        self.screen.blit(self.image, camera.apply(self.pos))
+
+
+class TextParticle(MovingParticle):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+    def update(self, delta_time: float):
+        self.vel.y *= 0.93
+
+        super().update(delta_time)
 
 
 class AngularParticle:
