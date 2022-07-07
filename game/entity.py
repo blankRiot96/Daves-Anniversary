@@ -19,10 +19,9 @@ class Entity(abc.ABC):
         self.rect = pygame.Rect(0, 0, 0, 0)  # Placeholder, derived class overwrite
 
         # can be "right" or "left"
-        self.facing = "right"
+        self.facing = EntityFacing.RIGHT
         self.state = EntityStates.IDLE
 
-        self.x, self.y = 0, 0
         self.vec = pygame.Vector2()
         self.tile_vec = pygame.Vector2()
 
@@ -33,7 +32,7 @@ class Entity(abc.ABC):
         self.gravity_acc = self.settings["gravity"]
     
     def handle_tile_collisions(
-        self, dt: float, neighboring_tiles: typing.List[typing.Any]
+        self, neighboring_tiles: typing.List[typing.Any]
     ) -> None:
         """
         Handles the tile collision
@@ -63,7 +62,15 @@ class Entity(abc.ABC):
                 elif self.vel.y < 0:
                     self.vel.y = 0
                     self.rect.top = neighboring_tile.rect.bottom
+
+    @property
+    def x(self):
+        return self.vec.x
     
+    @property
+    def y(self):
+        return self.vec.y
+
     @abc.abstractmethod
     def update(self, event_info: EventInfo, tilemap) -> None:
         pass
@@ -78,3 +85,8 @@ class EntityStates(enum.Enum):
     WALK = enum.auto()
     IDLE = enum.auto()
     JUMP = enum.auto()
+
+
+class EntityFacing(enum.Enum):
+    RIGHT = 1
+    LEFT = -1

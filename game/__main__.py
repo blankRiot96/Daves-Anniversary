@@ -21,7 +21,7 @@ class Game:
     Handles game
     """
 
-    FPS_CAP = 120
+    FPS_CAP = 60
 
     def __init__(self):
         """

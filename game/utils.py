@@ -13,7 +13,7 @@ from library.tilemap import TileLayerMap
 
 
 def pixel_to_tile(
-    pixel_pos: pygame.Vector2,
+    pixel_pos: typing.Union[tuple, pygame.Vector2],
     tile_width: int = TILE_WIDTH,
     tile_height: int = TILE_HEIGHT,
 ) -> pygame.Vector2:
@@ -26,13 +26,16 @@ def pixel_to_tile(
         tile_height: The tile height. Defaults to common.TILE_HEIGHT
     """
 
+    if isinstance(pixel_pos, tuple):
+        pixel_pos = pygame.Vector2(*pixel_pos)
+
     return pygame.Vector2(
         round(pixel_pos.x / tile_width), round(pixel_pos.y / tile_height)
     )
 
 
 def tile_to_pixel(
-    tile_pos: pygame.Vector2,
+    tile_pos: typing.Union[tuple, pygame.Vector2],
     tile_width: int = TILE_WIDTH,
     tile_height: int = TILE_HEIGHT,
 ) -> pygame.Vector2:
@@ -44,6 +47,9 @@ def tile_to_pixel(
         tile_width: The tile width. Defaults to common.TILE_WIDTH
         tile_height: The tile height. Defaults to common.TILE_HEIGHT
     """
+
+    if isinstance(tile_pos, tuple):
+        tile_pos = pygame.Vector2(*tile_pos)
 
     return pygame.Vector2(tile_pos.x * tile_width, tile_pos.y * tile_height)
 
@@ -79,3 +85,8 @@ def load_settings(path: pathlib.Path) -> dict:
         settings = json.load(f)
     
     return settings
+
+
+def string_pos_to_tuple(string: str) -> tuple:
+    string_split = string.replace("(", "").replace(")", "").split(",")
+    return int(string_split[0]), int(string_split[1])

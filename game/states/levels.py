@@ -11,6 +11,7 @@ from typing import Optional
 import pygame
 
 from game.common import HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH, EventInfo
+from game.enemy import MovingWall
 from game.player import Player
 from game.sound_icon import SoundIcon
 from game.states.enums import States, Dimensions
@@ -37,6 +38,7 @@ class InitLevelStage(abc.ABC):
         self.event_info = {}
 
         self.settings = load_settings(SETTINGS_DIR / f"{self.current_dimension.value}.json")
+        self.enemies = set()
 
 
 class TileStage(InitLevelStage):
@@ -50,6 +52,10 @@ class TileStage(InitLevelStage):
         self.tilemap = TileLayerMap(MAP_DIR / "dimension_one.tmx")
 
         self.map_surf = self.tilemap.make_map()
+
+        for enemy_obj in self.tilemap.tilemap.get_layer_by_name("enemies"):
+            if enemy_obj.name == "moving_wall":
+                self.enemies.add(MovingWall(self.settings, enemy_obj))
 
     def draw(self, screen: pygame.Surface):
         screen.blit(self.map_surf, self.camera.apply((0, 0)))
@@ -66,7 +72,7 @@ class PlayerStage(TileStage):
         self.player = Player(self.settings, self.assets["dave_walk"])
 
     def update(self, event_info: EventInfo):
-        self.player.update(event_info, self.tilemap)
+        self.player.update(event_info, self.tilemap, self.enemies)
         self.event_info = event_info
 
         # Temporary checking here
@@ -77,8 +83,21 @@ class PlayerStage(TileStage):
         super().draw(screen)
         self.player.draw(self.event_info["dt"], screen, self.camera)
 
+class EnemyStage(PlayerStage):
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
 
-class CameraStage(PlayerStage):
+        for enemy in self.enemies:
+            enemy.update(event_info, self.tilemap, self.player)
+    
+    def draw(self, screen: pygame.Surface):
+        super().draw(screen)
+
+        for enemy in self.enemies:
+            enemy.draw(self.event_info["dt"], screen, self.camera)
+
+
+class CameraStage(EnemyStage):
     def update(self, event_info: EventInfo):
         super().update(event_info)
         self.camera.adjust_to(self.event_info["dt"], self.player.rect)
