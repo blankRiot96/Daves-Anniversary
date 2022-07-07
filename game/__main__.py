@@ -92,7 +92,9 @@ class Game:
             self.screen.fill("grey19")
             self.game_state.draw(self.screen)
 
-            pygame.display.set_caption(f"Dave's Anniversary: {self.clock.get_fps():.1f} FPS")
+            pygame.display.set_caption(
+                f"Dave's Anniversary: {self.clock.get_fps():.1f} FPS"
+            )
 
             self._handle_state_switch()
             self.clock.tick(self.FPS_CAP)

@@ -14,7 +14,8 @@ from game.common import EventInfo
 
 class Entity(abc.ABC):
     def __init__(self, settings: dict):
-        self.settings = settings
+        # apply enemy stats
+        self.change_settings(settings)
 
         self.rect = pygame.Rect(0, 0, 0, 0)  # Placeholder, derived class overwrite
 
@@ -29,8 +30,9 @@ class Entity(abc.ABC):
         self.touched_ground = True
         self.alive = True
 
-        self.gravity_acc = self.settings["gravity"]
-    
+    def change_settings(self, settings: dict):
+        self.gravity_acc = settings["gravity"]
+
     def handle_tile_collisions(
         self, neighboring_tiles: typing.List[typing.Any]
     ) -> None:
@@ -66,7 +68,7 @@ class Entity(abc.ABC):
     @property
     def x(self):
         return self.vec.x
-    
+
     @property
     def y(self):
         return self.vec.y
@@ -78,7 +80,6 @@ class Entity(abc.ABC):
     @abc.abstractmethod
     def draw(self, dt: float, screen: pygame.Surface, camera) -> None:
         pass
-
 
 
 class EntityStates(enum.Enum):

@@ -83,7 +83,7 @@ def get_neighboring_tiles(
 def load_settings(path: pathlib.Path) -> dict:
     with open(path) as f:
         settings = json.load(f)
-    
+
     return settings
 
 
