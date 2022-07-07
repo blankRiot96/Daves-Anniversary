@@ -41,6 +41,9 @@ class InitLevelStage(abc.ABC):
         self.assets = load_assets("level")
         self.event_info = {}
 
+        self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
+        self.next_state: Optional[States] = None
+
         self.settings = {
             "parallel_dimension": load_settings(
                 SETTINGS_DIR / f"{Dimensions.PARALLEL_DIMENSION.value}.json"
@@ -61,6 +64,7 @@ class InitLevelStage(abc.ABC):
             #     SETTINGS_DIR / f"{Dimensions.HOMELAND_DIMENSION.value}.json"
             # ),
         }
+        self.dimensions_traveled = {self.current_dimension}
         self.enemies = set()
         self.portals = set()
         self.particle_manager = ParticleManager(self.camera)
@@ -117,7 +121,32 @@ class PlayerStage(TileStage):
         self.player.draw(self.event_info["dt"], screen, self.camera)
 
 
-class PortalStage(PlayerStage):
+class SpecialTileStage(PlayerStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+    
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+
+        for special_tiles in self.tilemap.special_tiles.values():
+            special_tiles.update(self.player)
+
+
+class EnemyStage(SpecialTileStage):
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+
+        for enemy in self.enemies:
+            enemy.update(event_info, self.tilemap, self.player)
+
+    def draw(self, screen: pygame.Surface):
+        for enemy in self.enemies:
+            enemy.draw(self.event_info["dt"], screen, self.camera)
+
+        super().draw(screen)
+
+
+class PortalStage(EnemyStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
 
@@ -156,37 +185,30 @@ class PortalStage(PlayerStage):
                 font = load_font(8)
                 formatted_txt = portal.current_dimension.value.replace('_', ' ').title()
 
-                self.particle_manager.add(
-                    TextParticle(
-                        screen=screen,
-                        image=font.render(f"Switched to: {formatted_txt}", True, (255, 255, 255)),
-                        pos=self.player.vec,
-                        vel=(0, -1.5),
-                        alpha_speed=3,
-                        lifespan=60
-                    )
+                text_particle = TextParticle(
+                    screen=screen,
+                    image=font.render(f"Switched to: {formatted_txt}", True, (255, 255, 255)),
+                    pos=self.player.vec,
+                    vel=(0, -1.5),
+                    alpha_speed=3,
+                    lifespan=80
                 )
+
+                if portal.current_dimension not in self.dimensions_traveled:
+                    self.dimensions_traveled.add(portal.current_dimension)
+
+                    self.transition.fade_out_in(
+                        on_finish=lambda: self.particle_manager.add(text_particle)
+                    )
+                else:
+                    self.particle_manager.add(text_particle)
 
             portal.draw(screen, self.camera)
 
         super().draw(screen)
 
 
-class EnemyStage(PortalStage):
-    def update(self, event_info: EventInfo):
-        super().update(event_info)
-
-        for enemy in self.enemies:
-            enemy.update(event_info, self.tilemap, self.player)
-
-    def draw(self, screen: pygame.Surface):
-        super().draw(screen)
-
-        for enemy in self.enemies:
-            enemy.draw(self.event_info["dt"], screen, self.camera)
-
-
-class CameraStage(EnemyStage):
+class CameraStage(PortalStage):
     def update(self, event_info: EventInfo):
         super().update(event_info)
 
@@ -260,8 +282,6 @@ class TransitionStage(ExplosionStage):
 
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-        self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
-        self.next_state: Optional[States] = None
 
         # Store any information needed to be passed
         # on to the next state
