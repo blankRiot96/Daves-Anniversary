@@ -4,9 +4,11 @@ The source code is distributed under the MIT license.
 """
 
 import pathlib
+from typing import Optional, Sequence
 
 import pygame
 import pytmx as pytmx
+import typing
 
 from .tiles import Tile
 
@@ -24,7 +26,7 @@ class TileLayerMap:
         # Tiles will be filled in on render_map
         self.tiles = {}
 
-    def render_map(self, surface: pygame.Surface) -> None:
+    def render_map(self, surface: pygame.Surface, tilset: Optional[Sequence] = None) -> None:
         """
         Renders the map to a given surface
 
@@ -42,7 +44,10 @@ class TileLayerMap:
                     if tile_props is None:
                         continue
 
-                    tile_img = self.tilemap.get_tile_image_by_gid(gid)
+                    if tilset is  None: 
+                        tile_img = self.tilemap.get_tile_image_by_gid(gid)
+                    else:
+                        tile_img = tilset[tile_props["id"]]
                     tile_instance = None
 
                     # Blit the tile image to surface
@@ -61,7 +66,7 @@ class TileLayerMap:
                         # Add tile instance to self.tiles
                         self.tiles[(x, y)] = tile_instance
 
-    def make_map(self) -> pygame.Surface:
+    def make_map(self, tileset: Optional[Sequence] = None) -> pygame.Surface:
         """
         Makes a pygame.Surface, then render the map and return the rendered map
 
@@ -70,5 +75,5 @@ class TileLayerMap:
         """
 
         temp_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        self.render_map(temp_surface)
+        self.render_map(temp_surface, tileset)
         return temp_surface

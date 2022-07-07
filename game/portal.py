@@ -18,7 +18,7 @@ class Portal:
         self.rect = self.image.get_rect(topleft=(obj.x, obj.y))
 
         self.dimension_cycle = itertools.cycle(dimensions)
-        self.current_dimension = dimensions[0]
+        self.current_dimension = next(self.dimension_cycle)
         self.dimension_change = False
 
     def update(self, player, events):
