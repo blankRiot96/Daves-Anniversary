@@ -37,7 +37,7 @@ class FadeTransition:
             self.alpha = 255
             if self.init_fade:
                 self.event = True
-    
+
     def fade_out_in(self, on_finish: Optional[Callable] = None):
         def func(self):
             self.fade_in = False
@@ -50,7 +50,6 @@ class FadeTransition:
                 self.effects.remove(func)
 
         self.effects.append(func)
-
 
     def update(self, dt: float) -> None:
         for effect in self.effects:

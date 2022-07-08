@@ -10,9 +10,9 @@ import pygame
 
 from game.common import HEIGHT, WIDTH
 from game.states.enums import States
+from game.states.intro import Dialogue
 from game.states.levels import Level
 from game.states.main_menu import MainMenu
-from game.states.intro import Dialogue
 
 logger = logging.getLogger()
 
@@ -35,7 +35,11 @@ class Game:
         self.state: States = States.DIALOGUE
 
         # Dictionary to initialize respective game state
-        self.perspective_states = {States.LEVEL: Level, States.MAIN_MENU: MainMenu, States.DIALOGUE: Dialogue}
+        self.perspective_states = {
+            States.LEVEL: Level,
+            States.MAIN_MENU: MainMenu,
+            States.DIALOGUE: Dialogue,
+        }
         self.game_state = self.perspective_states[self.state]({})
         self.clock = pygame.time.Clock()
 

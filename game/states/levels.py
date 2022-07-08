@@ -15,7 +15,7 @@ from game.player import Player
 from game.portal import Portal
 from game.sound_icon import SoundIcon
 from game.states.enums import Dimensions, States
-from game.utils import load_settings, load_font
+from game.utils import load_font, load_settings
 from library.effects import ExplosionManager
 from library.particles import ParticleManager, TextParticle
 from library.sfx import SFXManager
@@ -24,7 +24,6 @@ from library.tilemap import TileLayerMap
 from library.transition import FadeTransition
 from library.ui.buttons import Button
 from library.ui.camera import Camera
-
 
 logger = logging.getLogger()
 
@@ -87,10 +86,8 @@ class TileStage(InitLevelStage):
                 self.enemies.add(
                     MovingWall(self.settings[self.current_dimension.value], enemy_obj)
                 )
-        
-        self.tilesets = {
-            enm: self.assets[enm.value] for enm in Dimensions
-        }
+
+        self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
 
     def draw(self, screen: pygame.Surface):
         screen.blit(self.map_surf, self.camera.apply((0, 0)))
@@ -124,7 +121,7 @@ class PlayerStage(TileStage):
 class SpecialTileStage(PlayerStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-    
+
     def update(self, event_info: EventInfo):
         super().update(event_info)
 
@@ -152,8 +149,9 @@ class PortalStage(EnemyStage):
 
         for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
             if portal_obj.name == "portal":
-                self.portals.add(Portal(portal_obj, [enm for enm in Dimensions], self.assets))
-        
+                self.portals.add(
+                    Portal(portal_obj, [enm for enm in Dimensions], self.assets)
+                )
 
     def update(self, event_info: EventInfo):
         super().update(event_info)
@@ -168,7 +166,9 @@ class PortalStage(EnemyStage):
                 print(f"Changed dimension to: {portal.current_dimension}")
 
                 self.current_dimension = portal.current_dimension
-                self.map_surf = self.tilemap.make_map(self.tilesets[self.current_dimension])
+                self.map_surf = self.tilemap.make_map(
+                    self.tilesets[self.current_dimension]
+                )
 
                 # change player's settings
                 self.player.change_settings(self.settings[self.current_dimension.value])
@@ -178,20 +178,21 @@ class PortalStage(EnemyStage):
 
             portal.update(self.player, event_info)
 
-
     def draw(self, screen: pygame.Surface):
         for portal in self.portals:
             if portal.dimension_change:
                 font = load_font(8)
-                formatted_txt = portal.current_dimension.value.replace('_', ' ').title()
+                formatted_txt = portal.current_dimension.value.replace("_", " ").title()
 
                 text_particle = TextParticle(
                     screen=screen,
-                    image=font.render(f"Switched to: {formatted_txt}", True, (255, 255, 255)),
+                    image=font.render(
+                        f"Switched to: {formatted_txt}", True, (255, 255, 255)
+                    ),
                     pos=self.player.vec,
                     vel=(0, -1.5),
                     alpha_speed=3,
-                    lifespan=80
+                    lifespan=80,
                 )
 
                 if portal.current_dimension not in self.dimensions_traveled:
