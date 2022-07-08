@@ -8,6 +8,14 @@
         "sprite_sheet": null,
         "convert_alpha": true,
         "states": ["level"]
+    },
+    "portal.png": {
+        "sprite_sheet": {
+            "size": [32, 32],
+            "bound": false
+        },
+        "convert_alpha": true,
+        "states": ["level"]
     }
 }
 

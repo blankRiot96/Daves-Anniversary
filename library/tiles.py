@@ -22,12 +22,22 @@ class Tile:
         self.image = image
         self.rect = self.image.get_rect(topleft=pos)
 
-    def update(self, scroll: pygame.Vector2):
+    def update(self, player):
         """
         Draws the tile
         Parameters:
                 scroll: World camera scroll
         """
+
+
+class SpikeTile:
+    def __init__(self, image: pygame.Surface, pos: tuple[int, int]):
+        self.image = image
+        self.rect = self.image.get_rect(topleft=pos)
+
+    def update(self, player):
+        if player.rect.colliderect(self.rect):
+            player.alive = False
 
 
 class AnimatedDecorationTile:

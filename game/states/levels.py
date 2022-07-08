@@ -15,15 +15,15 @@ from game.player import Player
 from game.portal import Portal
 from game.sound_icon import SoundIcon
 from game.states.enums import Dimensions, States
-from game.utils import load_settings
+from game.utils import load_font, load_settings
 from library.effects import ExplosionManager
+from library.particles import ParticleManager, TextParticle
 from library.sfx import SFXManager
 from library.sprite.load import load_assets
 from library.tilemap import TileLayerMap
 from library.transition import FadeTransition
 from library.ui.buttons import Button
 from library.ui.camera import Camera
-
 
 logger = logging.getLogger()
 
@@ -39,6 +39,9 @@ class InitLevelStage(abc.ABC):
         self.sfx_manager = SFXManager("level")
         self.assets = load_assets("level")
         self.event_info = {}
+
+        self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
+        self.next_state: Optional[States] = None
 
         self.settings = {
             "parallel_dimension": load_settings(
@@ -60,8 +63,10 @@ class InitLevelStage(abc.ABC):
             #     SETTINGS_DIR / f"{Dimensions.HOMELAND_DIMENSION.value}.json"
             # ),
         }
+        self.dimensions_traveled = {self.current_dimension}
         self.enemies = set()
         self.portals = set()
+        self.particle_manager = ParticleManager(self.camera)
 
 
 class TileStage(InitLevelStage):
@@ -81,10 +86,8 @@ class TileStage(InitLevelStage):
                 self.enemies.add(
                     MovingWall(self.settings[self.current_dimension.value], enemy_obj)
                 )
-        
-        self.tilesets = {
-            enm: self.assets[enm.value] for enm in Dimensions
-        }
+
+        self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
 
     def draw(self, screen: pygame.Surface):
         screen.blit(self.map_surf, self.camera.apply((0, 0)))
@@ -115,14 +118,40 @@ class PlayerStage(TileStage):
         self.player.draw(self.event_info["dt"], screen, self.camera)
 
 
-class PortalStage(PlayerStage):
+class SpecialTileStage(PlayerStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+
+        for special_tiles in self.tilemap.special_tiles.values():
+            special_tiles.update(self.player)
+
+
+class EnemyStage(SpecialTileStage):
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+
+        for enemy in self.enemies:
+            enemy.update(event_info, self.tilemap, self.player)
+
+    def draw(self, screen: pygame.Surface):
+        for enemy in self.enemies:
+            enemy.draw(self.event_info["dt"], screen, self.camera)
+
+        super().draw(screen)
+
+
+class PortalStage(EnemyStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
 
         for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
             if portal_obj.name == "portal":
-                self.portals.add(Portal(portal_obj, [enm for enm in Dimensions]))
-        
+                self.portals.add(
+                    Portal(portal_obj, [enm for enm in Dimensions], self.assets)
+                )
 
     def update(self, event_info: EventInfo):
         super().update(event_info)
@@ -134,8 +163,12 @@ class PortalStage(PlayerStage):
                 portal.current_dimension = self.current_dimension
             # otherwise (if we're switching dimension)
             else:
+                print(f"Changed dimension to: {portal.current_dimension}")
+
                 self.current_dimension = portal.current_dimension
-                self.map_surf = self.tilemap.make_map(self.tilesets[self.current_dimension])
+                self.map_surf = self.tilemap.make_map(
+                    self.tilesets[self.current_dimension]
+                )
 
                 # change player's settings
                 self.player.change_settings(self.settings[self.current_dimension.value])
@@ -145,29 +178,38 @@ class PortalStage(PlayerStage):
 
             portal.update(self.player, event_info)
 
-
     def draw(self, screen: pygame.Surface):
         for portal in self.portals:
+            if portal.dimension_change:
+                font = load_font(8)
+                formatted_txt = portal.current_dimension.value.replace("_", " ").title()
+
+                text_particle = TextParticle(
+                    screen=screen,
+                    image=font.render(
+                        f"Switched to: {formatted_txt}", True, (255, 255, 255)
+                    ),
+                    pos=self.player.vec,
+                    vel=(0, -1.5),
+                    alpha_speed=3,
+                    lifespan=80,
+                )
+
+                if portal.current_dimension not in self.dimensions_traveled:
+                    self.dimensions_traveled.add(portal.current_dimension)
+
+                    self.transition.fade_out_in(
+                        on_finish=lambda: self.particle_manager.add(text_particle)
+                    )
+                else:
+                    self.particle_manager.add(text_particle)
+
             portal.draw(screen, self.camera)
 
         super().draw(screen)
 
 
-class EnemyStage(PortalStage):
-    def update(self, event_info: EventInfo):
-        super().update(event_info)
-
-        for enemy in self.enemies:
-            enemy.update(event_info, self.tilemap, self.player)
-
-    def draw(self, screen: pygame.Surface):
-        super().draw(screen)
-
-        for enemy in self.enemies:
-            enemy.draw(self.event_info["dt"], screen, self.camera)
-
-
-class CameraStage(EnemyStage):
+class CameraStage(PortalStage):
     def update(self, event_info: EventInfo):
         super().update(event_info)
 
@@ -197,6 +239,7 @@ class UIStage(CameraStage):  # Skipped for now
             button.update(event_info["mouse_pos"], event_info["mouse_press"])
 
         self.sound_icon.update(event_info)
+        self.particle_manager.update(event_info)
 
     def draw(self, screen: pygame.Surface):
         """
@@ -209,6 +252,7 @@ class UIStage(CameraStage):  # Skipped for now
         for button in self.buttons:
             button.draw(screen)
         self.sound_icon.draw(screen)
+        self.particle_manager.draw()
 
 
 class ExplosionStage(UIStage):  # Skipped for now
@@ -239,8 +283,6 @@ class TransitionStage(ExplosionStage):
 
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-        self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
-        self.next_state: Optional[States] = None
 
         # Store any information needed to be passed
         # on to the next state

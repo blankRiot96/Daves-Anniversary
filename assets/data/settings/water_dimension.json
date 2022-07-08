@@ -1,5 +1,5 @@
 {
-    "gravity": 0.1,
-    "player_speed": 1,
-    "player_jump": -7.5
+    "gravity": 0.05,
+    "player_speed": 0.4,
+    "player_jump": -4
 }

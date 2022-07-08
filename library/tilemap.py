@@ -4,13 +4,13 @@ The source code is distributed under the MIT license.
 """
 
 import pathlib
+import typing
 from typing import Optional, Sequence
 
 import pygame
 import pytmx as pytmx
-import typing
 
-from .tiles import Tile
+from .tiles import SpikeTile, Tile
 
 
 class TileLayerMap:
@@ -25,8 +25,11 @@ class TileLayerMap:
 
         # Tiles will be filled in on render_map
         self.tiles = {}
+        self.special_tiles = {}
 
-    def render_map(self, surface: pygame.Surface, tilset: Optional[Sequence] = None) -> None:
+    def render_map(
+        self, surface: pygame.Surface, tilset: Optional[Sequence] = None
+    ) -> None:
         """
         Renders the map to a given surface
 
@@ -44,7 +47,7 @@ class TileLayerMap:
                     if tile_props is None:
                         continue
 
-                    if tilset is  None: 
+                    if tilset is None:
                         tile_img = self.tilemap.get_tile_image_by_gid(gid)
                     else:
                         tile_img = tilset[tile_props["id"]]
@@ -65,6 +68,14 @@ class TileLayerMap:
 
                         # Add tile instance to self.tiles
                         self.tiles[(x, y)] = tile_instance
+
+                    if tile_props.get("special_type") == "spike":
+                        tile_instance = SpikeTile(
+                            tile_img,
+                            (x * self.tilemap.tilewidth, y * self.tilemap.tileheight),
+                        )
+
+                        self.special_tiles[(x, y)] = tile_instance
 
     def make_map(self, tileset: Optional[Sequence] = None) -> pygame.Surface:
         """
