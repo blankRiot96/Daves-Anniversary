@@ -29,7 +29,7 @@ class HorizontalSlider:
         # and a `pygame.Rect` here, you can inflate it as above to be a fraction of the length
         # you also wouldn't need `self.x` and `self.y`
         self.x, self.y = rect.center
-        self.radius = int(rect.width * 0.075)
+        self.radius = int(rect.width * 0.06)
         # self.button = (rect.center, self.radius)  # (center, radius)
         self.clicked = False
         self.prev_value = 0

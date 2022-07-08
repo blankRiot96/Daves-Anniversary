@@ -10,13 +10,13 @@ from library.ui.slider import HorizontalSlider
 
 
 class SoundIcon:
-    SIZE = 32, 32
+    SIZE = 16, 16
 
     def __init__(self, sfx_manager: _SFXManager, assets, center_pos):
         self.sfx_manager = sfx_manager
 
-        slider_rect = pygame.Rect(50, 180, 110, 30)
-        slider_rect.center = center_pos + pygame.Vector2(0, 30)
+        slider_rect = pygame.Rect(50, 180, 60, 20)
+        slider_rect.center = center_pos + pygame.Vector2(0, 20)
         self.on_img = pygame.transform.scale(assets["sound_icon_on"], self.SIZE)
         self.off_img = pygame.transform.scale(assets["sound_icon_off"], self.SIZE)
         self.switch = True

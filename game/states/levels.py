@@ -10,7 +10,7 @@ from typing import Optional
 import pygame
 
 from game.background import BackGroundEffect
-from game.common import HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH, EventInfo
+from game.common import HEIGHT, MAP_DIR, SETTINGS_DIR, AUDIO_DIR, WIDTH, EventInfo
 from game.enemy import MovingWall
 from game.player import Player
 from game.portal import Portal
@@ -248,7 +248,13 @@ class UIStage(CameraStage):  # Skipped for now
         super().__init__(switch_info)
         self.buttons = ()
 
-        self.sound_icon = SoundIcon(self.sfx_manager, self.assets, center_pos=(700, 30))
+        stub_rect = pygame.Rect(0, 0, 16, 16)
+        stub_rect.topright = pygame.Surface((WIDTH, HEIGHT)).get_rect().topright
+        stub_rect.topright = (
+            stub_rect.topright[0] - 32,
+            stub_rect.topright[1] + 16
+        )
+        self.sound_icon = SoundIcon(self.sfx_manager, self.assets, center_pos=stub_rect.center)
 
     def update(self, event_info: EventInfo):
         """
@@ -278,7 +284,7 @@ class UIStage(CameraStage):  # Skipped for now
         self.particle_manager.draw()
 
 
-class ExplosionStage(UIStage):  # Skipped for now
+class ExplosionStage(UIStage):  
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         self.explosion_manager = ExplosionManager("fire")

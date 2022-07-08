@@ -21,6 +21,7 @@ TILE_HEIGHT = 16
 ROOT_DIR = pathlib.Path(".")
 ASSETS_DIR = ROOT_DIR / "assets"
 DATA_DIR = ASSETS_DIR / "data"
+AUDIO_DIR = ASSETS_DIR / "audio"
 MAP_DIR = ASSETS_DIR / "maps"
 FONT_DIR = ASSETS_DIR / "fonts"
 

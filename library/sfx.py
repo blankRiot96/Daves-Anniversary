@@ -51,12 +51,22 @@ class SFXManager:
     def __init__(self, state: str):
         self.sounds = load_sfx(state)
 
+        if "bgm" in self.sounds:
+            pygame.mixer.music.load("assets/audio/bgm.mp3")
+            pygame.mixer.music.play(loops=-1, fade_ms=5000)
+
     def play(self, sound_key: str):
         sound_obj = self.sounds[sound_key]
         sound = sound_obj.sound
         sound.play()
 
     def set_volume(self, percentage: float):
+
+
         for sound_obj in self.sounds.values():
             volume = (percentage / 100) * sound_obj.original_volume
             sound_obj.sound.set_volume(volume)
+        
+        if pygame.mixer.music.get_busy():
+            volume = (percentage / 100) * self.sounds["bgm"].original_volume
+            pygame.mixer.music.set_volume(volume)
