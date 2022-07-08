@@ -9,6 +9,7 @@ from typing import Optional
 
 import pygame
 
+from game.background import BackGroundEffect
 from game.common import HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH, EventInfo
 from game.enemy import MovingWall
 from game.player import Player
@@ -38,7 +39,7 @@ class InitLevelStage(abc.ABC):
         self.camera = Camera(WIDTH, HEIGHT)
         self.sfx_manager = SFXManager("level")
         self.assets = load_assets("level")
-        self.event_info = {}
+        self.event_info = {"dt": 0}
 
         self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
         self.next_state: Optional[States] = None
@@ -68,8 +69,58 @@ class InitLevelStage(abc.ABC):
         self.portals = set()
         self.particle_manager = ParticleManager(self.camera)
 
+    def update(*args, **kwargs):
+        pass
 
-class TileStage(InitLevelStage):
+    def draw(*args, **kwargs):
+        pass
+
+
+class RenderBackgroundStage(InitLevelStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        self.background_manager = BackGroundEffect(self.assets)
+
+    def update(self):
+        self.background_manager.update(self.event_info)
+
+    def draw(self, screen):
+        self.background_manager.draw(screen, self.camera, self.current_dimension)
+
+
+class RenderPortalStage(RenderBackgroundStage):
+    def draw(self, screen: pygame.Surface):
+        super().draw(screen)
+
+        for portal in self.portals:
+            if portal.dimension_change:
+                font = load_font(8)
+                formatted_txt = portal.current_dimension.value.replace("_", " ").title()
+
+                text_particle = TextParticle(
+                    screen=screen,
+                    image=font.render(
+                        f"Switched to: {formatted_txt}", True, (255, 255, 255)
+                    ),
+                    pos=self.player.vec,
+                    vel=(0, -1.5),
+                    alpha_speed=3,
+                    lifespan=80,
+                )
+
+                if portal.current_dimension not in self.dimensions_traveled:
+                    self.dimensions_traveled.add(portal.current_dimension)
+
+                    self.transition.fade_out_in(
+                        on_finish=lambda: self.particle_manager.add(text_particle)
+                    )
+                else:
+                    self.particle_manager.add(text_particle)
+
+            portal.draw(screen, self.camera)
+
+
+class TileStage(RenderPortalStage):
     """
     Handles tilemap rendering
     """
@@ -90,6 +141,7 @@ class TileStage(InitLevelStage):
         self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
 
     def draw(self, screen: pygame.Surface):
+        super().draw(screen)
         screen.blit(self.map_surf, self.camera.apply((0, 0)))
 
 
@@ -106,6 +158,7 @@ class PlayerStage(TileStage):
         )
 
     def update(self, event_info: EventInfo):
+        super().update()
         self.player.update(event_info, self.tilemap, self.enemies)
         self.event_info = event_info
 
@@ -115,7 +168,7 @@ class PlayerStage(TileStage):
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
-        self.player.draw(self.event_info["dt"], screen, self.camera)
+        self.player.draw(screen, self.camera)
 
 
 class SpecialTileStage(PlayerStage):
@@ -137,10 +190,10 @@ class EnemyStage(SpecialTileStage):
             enemy.update(event_info, self.tilemap, self.player)
 
     def draw(self, screen: pygame.Surface):
+        super().draw(screen)
+
         for enemy in self.enemies:
             enemy.draw(self.event_info["dt"], screen, self.camera)
-
-        super().draw(screen)
 
 
 class PortalStage(EnemyStage):
@@ -177,36 +230,6 @@ class PortalStage(EnemyStage):
                     enemy.change_settings(self.settings[self.current_dimension.value])
 
             portal.update(self.player, event_info)
-
-    def draw(self, screen: pygame.Surface):
-        for portal in self.portals:
-            if portal.dimension_change:
-                font = load_font(8)
-                formatted_txt = portal.current_dimension.value.replace("_", " ").title()
-
-                text_particle = TextParticle(
-                    screen=screen,
-                    image=font.render(
-                        f"Switched to: {formatted_txt}", True, (255, 255, 255)
-                    ),
-                    pos=self.player.vec,
-                    vel=(0, -1.5),
-                    alpha_speed=3,
-                    lifespan=80,
-                )
-
-                if portal.current_dimension not in self.dimensions_traveled:
-                    self.dimensions_traveled.add(portal.current_dimension)
-
-                    self.transition.fade_out_in(
-                        on_finish=lambda: self.particle_manager.add(text_particle)
-                    )
-                else:
-                    self.particle_manager.add(text_particle)
-
-            portal.draw(screen, self.camera)
-
-        super().draw(screen)
 
 
 class CameraStage(PortalStage):
@@ -262,7 +285,7 @@ class ExplosionStage(UIStage):  # Skipped for now
 
     def update(self, event_info: EventInfo) -> None:
         super().update(event_info)
-        self.explosion_manager.update()
+        self.explosion_manager.update(event_info["dt"])
 
         for event in event_info["events"]:
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -271,7 +294,7 @@ class ExplosionStage(UIStage):  # Skipped for now
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
-        self.explosion_manager.draw(screen, self.event_info["dt"])
+        self.explosion_manager.draw(screen)
 
 
 class TransitionStage(ExplosionStage):

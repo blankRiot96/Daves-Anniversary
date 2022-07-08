@@ -12,11 +12,13 @@ explode around that place, explosions are great
 """
 
 
+import json
 import random
 from typing import List, Set
 
 import pygame
 
+from game.common import DATA_DIR
 from library.common import Pos
 from library.particles import AngularParticle
 
@@ -52,35 +54,21 @@ class Explosion:
             for _ in range(n_particles)
         ]
 
-    def draw(self, screen, dt):
+    def update(self, dt):
         for particle in self.particles:
-            particle.draw(screen, dt)
+            particle.update(dt)
 
             if particle.size < 0:
                 self.particles.remove(particle)
 
+    def draw(self, screen):
+        for particle in self.particles:
+            particle.draw(screen)
+
 
 class ExplosionManager:
-    EXP_TYPES = {
-        "arcade": {
-            "n_particles": 500,
-            "n_size": (3, 10),
-            "speed": (0.09, 1.3),
-            "shape": "square",
-            "color": "rainbow",
-            "glow": False,
-            "size_reduction": 0.2,
-        },
-        "fire": {
-            "n_particles": 500,
-            "n_size": (3, 10),
-            "speed": (1.3, 3.5),
-            "shape": "circle",
-            "color": "orange",
-            "glow": False,
-            "size_reduction": 0.2,
-        },
-    }
+    with open(DATA_DIR / "explosion.json") as f:
+        EXP_TYPES = json.load(f)
 
     def __init__(self, exp_type: str):
         self.exp_type: str = exp_type
@@ -100,11 +88,13 @@ class ExplosionManager:
             )
         )
 
-    def update(self):
+    def update(self, dt: float):
         for explosion in set(self.explosions):
+            explosion.update(dt)
+
             if len(explosion.particles) == 0:
                 self.explosions.remove(explosion)
 
-    def draw(self, screen: pygame.Surface, dt: float):
+    def draw(self, screen: pygame.Surface):
         for explosion in self.explosions:
-            explosion.draw(screen, dt)
+            explosion.draw(screen)

@@ -16,6 +16,11 @@
         },
         "convert_alpha": true,
         "states": ["level"]
+    },
+    "rotating_rect.png": {
+        "sprite_sheet": null,
+        "convert_alpha": true,
+        "states": ["level"]
     }
 }
 

@@ -172,7 +172,7 @@ class AngularParticle:
         self,
         pos: Tuple[int, int],
         color: Union[Tuple[int, int, int], str],
-        size: Tuple[int, int],
+        size: float,
         speed: float,
         shape: str,
         size_reduction,
@@ -199,7 +199,7 @@ class AngularParticle:
         self.size_reduction = size_reduction
         self.glow = glow
 
-    def draw(self, screen: pygame.Surface, dt: float, speed_reduce=0):
+    def update(self, dt: float, speed_reduce=0):
         if speed_reduce:
             self.dx, self.dy = get_movement(self.angle, speed_reduce)
         self.vec[0] += self.dx * dt
@@ -211,6 +211,7 @@ class AngularParticle:
         self.size -= self.size_reduction * dt
         self.rect = pygame.Rect(self.vec, (self.size, self.size))
 
+    def draw(self, screen: pygame.Surface):
         if self.shape == "square":
             pygame.draw.rect(screen, self.color, self.rect)
         elif self.shape == "circle":
