@@ -3,6 +3,8 @@ This file is a part of the 'Unnamed' source code.
 The source code is distributed under the MIT license.
 """
 
+from typing import Callable, Optional
+
 import pygame
 
 
@@ -16,6 +18,7 @@ class FadeTransition:
         self.event = False
         self.alpha = 255 if fade_in else 0
         self.image.set_alpha(self.alpha)
+        self.effects = []
 
     def _handle_fade_in(self, dt: float):
         if self.alpha > 0:
@@ -34,8 +37,25 @@ class FadeTransition:
             self.alpha = 255
             if self.init_fade:
                 self.event = True
+    
+    def fade_out_in(self, on_finish: Optional[Callable] = None):
+        def func(self):
+            self.fade_in = False
+            if self.event and not self.fade_in:
+                self.fade_in = True
+
+                if on_finish is not None:
+                    on_finish()
+
+                self.effects.remove(func)
+
+        self.effects.append(func)
+
 
     def update(self, dt: float) -> None:
+        for effect in self.effects:
+            effect(self)
+
         if self.fade_in:
             self._handle_fade_in(dt)
         else:
