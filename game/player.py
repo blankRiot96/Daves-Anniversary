@@ -9,6 +9,7 @@ import pygame
 from game.common import TILE_HEIGHT, TILE_WIDTH, EventInfo
 from game.entity import Entity, EntityFacing, EntityStates
 from game.utils import get_neighboring_tiles, pixel_to_tile
+from library.effects.explosions import ExplosionManager
 from library.utils.animation import Animation
 from library.utils.funcs import flip_images
 
@@ -33,10 +34,13 @@ class Player(Entity):
             "walk_right": Animation(walk_frames, self.WALK_ANIM_SPEED),
             "walk_left": Animation(flip_images(walk_frames), self.WALK_ANIM_SPEED),
         }
+        self.animation = None
         self.speed = settings["player_speed"]
         self.jump_height = settings["player_jump"]
 
         self.rect = pygame.Rect((0, 0), self.SIZE)
+        self.jump_exp = ExplosionManager("smoke-jump")
+        self.is_jump = False
 
     def change_settings(self, settings: dict) -> None:
         self.speed = settings["player_speed"]
@@ -63,9 +67,11 @@ class Player(Entity):
             self.state = EntityStates.WALK
             self.facing = EntityFacing.LEFT
 
+        self.is_jump = False
         for event in event_info["events"]:
             if event.type == pygame.KEYDOWN:
                 if event.key in self.SPACE_KEYS and self.touched_ground:
+                    self.is_jump = True
                     self.vel.y = self.jump_height
                     self.touched_ground = False
 
@@ -108,7 +114,19 @@ class Player(Entity):
         self.vec.x, self.vec.y = self.rect.topleft
         self.tile_vec = pixel_to_tile(self.vec)
 
-    def draw(self, dt: float, screen: pygame.Surface, camera) -> None:
+        # Jump exp
+        self.jump_exp.update(dt)
+
+        # Animation
+        self.animation = self.animations[f"walk_{self.facing.name.lower()}"]
+        self.animation.update(dt)
+
+    def handle_jump_exp(self, screen, camera):
+        if self.is_jump:
+            self.jump_exp.create_explosion(camera.apply(self.vec).topleft)
+        self.jump_exp.draw(screen)
+
+    def draw(self, screen: pygame.Surface, camera) -> None:
         """
         Draws the player
 
@@ -117,9 +135,11 @@ class Player(Entity):
             screen: pygame.Surface to draw player on
             camera: camera.Camera to adjust position
         """
+        self.handle_jump_exp(screen, camera)
+
         animation = self.animations[f"walk_{self.facing.name.lower()}"]
 
         if self.state == EntityStates.WALK:
-            animation.play(screen, camera.apply(self.vec).topleft, dt)
+            animation.draw(screen, camera.apply(self.vec).topleft)
         else:
             screen.blit(animation.frames[0], camera.apply(self.vec))
