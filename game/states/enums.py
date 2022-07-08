@@ -13,6 +13,7 @@ class States(enum.Enum):
 
     MAIN_MENU = "main menu"
     LEVEL = "level"
+    DIALOGUE = "dialogue"
 
 
 class Dimensions(enum.Enum):

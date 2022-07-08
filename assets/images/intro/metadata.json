@@ -1,0 +1,18 @@
+{
+    "frame_1.png": {
+        "sprite_sheet": null,
+        "convert_alpha": false,
+        "states": ["intro"]
+    },
+    "frame_2.png": {
+        "sprite_sheet": null,
+        "convert_alpha": false,
+        "states": ["intro"]
+    },
+    "frame_3.png": {
+        "sprite_sheet": null,
+        "convert_alpha": false,
+        "states": ["intro"]
+    }
+}
+

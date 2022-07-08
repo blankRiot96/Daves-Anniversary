@@ -10,7 +10,6 @@ from typing import Tuple, Union
 import pygame
 
 from game.common import EventInfo
-
 from library.utils.funcs import circle_surf, get_movement
 
 
@@ -50,7 +49,7 @@ class Particle:
         vel: tuple[int] = (-0.5, 0.1),
         gravity: float = 0.1,
         color: Union[Tuple[int, int, int], str] = "white",
-        lifespan: int = 0
+        lifespan: int = 0,
     ):
         """
         Parameters:
@@ -114,7 +113,7 @@ class MovingParticle:
         vel: Tuple[int],
         alpha_speed: int,
         starting_alpha: int = 255,
-        lifespan: int = 0
+        lifespan: int = 0,
     ):
         """
         Parameters:
@@ -161,7 +160,6 @@ class MovingParticle:
 class TextParticle(MovingParticle):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
 
     def update(self, delta_time: float):
         self.vel.y *= 0.93

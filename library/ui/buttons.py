@@ -21,6 +21,7 @@ class Button:
         colors: Dict[str, Tuple[int, int, int]],
         font_name: str,
         text: str,
+        corner_radius: int = None,
     ) -> None:
         """
         Parameters:
@@ -37,6 +38,8 @@ class Button:
         font = library.utils.font(size=size[1], name=font_name)
         self.text_surf = font.render(text, False, colors["text"])
         self.text_pos = self.text_surf.get_rect(center=self.rect.center).topleft
+
+        self.corner_radius = corner_radius
 
         self.state = "static"
         self.clicked = False
@@ -65,5 +68,14 @@ class Button:
         Parameters:
             screen: Display surface
         """
-        pygame.draw.rect(screen, self.colors[self.state], self.rect)
+        if self.corner_radius is None:
+            pygame.draw.rect(screen, self.colors[self.state], self.rect)
+        else:
+            pygame.draw.rect(
+                screen,
+                self.colors[self.state],
+                self.rect,
+                border_radius=self.corner_radius,
+            )
+
         screen.blit(self.text_surf, self.text_pos)

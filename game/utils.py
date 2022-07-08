@@ -9,7 +9,7 @@ from functools import lru_cache
 
 import pygame
 
-from game.common import TILE_HEIGHT, TILE_WIDTH, FONT_DIR
+from game.common import FONT_DIR, TILE_HEIGHT, TILE_WIDTH
 from library.tilemap import TileLayerMap
 
 
