@@ -24,6 +24,7 @@ from library.tilemap import TileLayerMap
 from library.transition import FadeTransition
 from library.ui.buttons import Button
 from library.ui.camera import Camera
+from game.background import BackGroundEffect
 
 logger = logging.getLogger()
 
@@ -38,7 +39,9 @@ class InitLevelStage(abc.ABC):
         self.camera = Camera(WIDTH, HEIGHT)
         self.sfx_manager = SFXManager("level")
         self.assets = load_assets("level")
-        self.event_info = {}
+        self.event_info = {
+            "dt": 0
+        }
 
         self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
         self.next_state: Optional[States] = None
@@ -69,9 +72,19 @@ class InitLevelStage(abc.ABC):
         self.particle_manager = ParticleManager(self.camera)
 
 
+class RenderBackgroundStage(InitLevelStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        self.background_manager = BackGroundEffect(self.assets)
+    
+    def update(self):
+        self.background_manager.update(self.event_info)
+    
+    def draw(self, screen):
+        self.background_manager.draw(screen, self.camera)
 
 
-class TileStage(InitLevelStage):
+class TileStage(RenderBackgroundStage):
     """
     Handles tilemap rendering
     """
@@ -92,6 +105,7 @@ class TileStage(InitLevelStage):
         self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
 
     def draw(self, screen: pygame.Surface):
+        super().draw(screen)
         screen.blit(self.map_surf, self.camera.apply((0, 0)))
 
 
@@ -108,6 +122,7 @@ class PlayerStage(TileStage):
         )
 
     def update(self, event_info: EventInfo):
+        super().update()
         self.player.update(event_info, self.tilemap, self.enemies)
         self.event_info = event_info
 
