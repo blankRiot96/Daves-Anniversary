@@ -10,11 +10,9 @@ import pygame
 
 from game.common import TILE_HEIGHT, TILE_WIDTH
 from game.states.enums import Dimensions
-from library.utils.animation import Animation
 
 
 class Portal:
-    ANIMATION_SPEED = 0.01
     def __init__(self, obj, dimensions: List[Dimensions], assets: dict):
         self.frames = assets["portal"]
         # the frame switches when the portal is colliding with the player
