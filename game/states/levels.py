@@ -152,7 +152,7 @@ class PortalStage(EnemyStage):
 
         for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
             if portal_obj.name == "portal":
-                self.portals.add(Portal(portal_obj, [enm for enm in Dimensions]))
+                self.portals.add(Portal(portal_obj, [enm for enm in Dimensions], self.assets))
         
 
     def update(self, event_info: EventInfo):
