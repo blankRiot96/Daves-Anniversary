@@ -22,6 +22,15 @@
         },
         "convert_alpha": true,
         "states": ["level"]
+    },
+
+    "moon_dimension.png": {
+        "sprite_sheet": {
+            "size": [16, 16],
+            "bound": false
+        },
+        "convert_alpha": true,
+        "states": ["level"]
     }
 }
 
