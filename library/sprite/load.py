@@ -22,10 +22,10 @@ def get_images(
     Converts a sprite sheet to a list of surfaces
 
     Parameters:
-            sheet: A pygame.Surface that contains the sprite sheet
-            rows: Amount of rows in the sprite sheet
-            columns: Amount of columds in the sprite sheet
-            size: Size of a sprite in the sprite sheet
+        sheet: A pygame.Surface that contains the sprite sheet
+        rows: Amount of rows in the sprite sheet
+        columns: Amount of columds in the sprite sheet
+        size: Size of a sprite in the sprite sheet
     """
     images = []
 
@@ -37,10 +37,12 @@ def get_images(
 
     for row in range(rows):
         for col in range(columns):
-            # get the image
             image = sheet.subsurface(pygame.Rect((col * width), (row * height), *size))
 
-            # add it to the image list
+            if bound:
+                r = image.get_bounding_rect()
+                image = image.subsurface(r)
+
             images.append(image)
 
     return images

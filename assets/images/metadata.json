@@ -21,6 +21,14 @@
         "sprite_sheet": null,
         "convert_alpha": true,
         "states": ["level"]
+    },
+    "note.png": {
+        "sprite_sheet": {
+            "size": [16, 16],
+            "bound": true
+        },
+        "convert_alpha": true,
+        "states": ["level"]
     }
 }
 
