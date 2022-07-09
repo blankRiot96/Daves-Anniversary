@@ -33,7 +33,6 @@ class InitDialogueStage:
         self.switching = False
 
         self.sfx_manager = SFXManager("intro")
-        self.sfx_manager.play("intro")
 
         self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
 
@@ -113,12 +112,7 @@ class TransitionDialogueStage(ButtonDialogueStage):
         self.transition.draw(screen)
 
 
-class MusicDialogueStage(TransitionDialogueStage):
-    def update(self, event_info: EventInfo):
-        super().update(event_info)
-
-
-class Dialogue(MusicDialogueStage):
+class Dialogue(TransitionDialogueStage):
     def update(self, event_info: EventInfo):
         super().update(event_info)
 

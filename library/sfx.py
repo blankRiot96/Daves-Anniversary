@@ -52,7 +52,7 @@ class SFXManager:
         self.sounds = load_sfx(state)
 
         if "bgm" in self.sounds:
-            pygame.mixer.music.load("assets/audio/bgm.mp3")
+            pygame.mixer.music.load(f"assets/audio/{state}/bgm.mp3")
             pygame.mixer.music.play(loops=-1, fade_ms=5000)
 
     def play(self, sound_key: str):
