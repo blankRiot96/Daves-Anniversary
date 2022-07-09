@@ -12,6 +12,7 @@ import pygame
 from game.background import BackGroundEffect
 from game.common import HEIGHT, MAP_DIR, SETTINGS_DIR, AUDIO_DIR, WIDTH, EventInfo
 from game.enemy import MovingWall
+from game.items.grapple import Grapple
 from game.player import Player
 from game.portal import Portal
 from game.sound_icon import SoundIcon
@@ -68,6 +69,10 @@ class InitLevelStage(abc.ABC):
         self.enemies = set()
         self.portals = set()
         self.particle_manager = ParticleManager(self.camera)
+        
+        self.player = Player(
+            self.settings[self.current_dimension.value], self.assets["dave_walk"], self.camera, self.particle_manager
+        )
 
     def update(*args, **kwargs):
         pass
@@ -145,6 +150,20 @@ class TileStage(RenderPortalStage):
         screen.blit(self.map_surf, self.camera.apply((0, 0)))
 
 
+"""class ItemStage(TileStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+
+        self.grapple = Grapple(self.player, self.camera)
+    
+    def draw(self, screen):
+        super().draw(screen)
+        self.grapple.draw(screen)
+    
+    def update(self, event_info: EventInfo):
+        self.grapple.update(event_info, self.tilemap)"""
+
+
 class PlayerStage(TileStage):
     """
     Handle player related actions
@@ -153,12 +172,13 @@ class PlayerStage(TileStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
 
-        self.player = Player(
-            self.settings[self.current_dimension.value], self.assets["dave_walk"]
-        )
+        # self.player = Player(
+        #     self.settings[self.current_dimension.value], self.assets["dave_walk"]
+        # )
 
     def update(self, event_info: EventInfo):
         super().update()
+
         self.player.update(event_info, self.tilemap, self.enemies)
         self.event_info = event_info
 
@@ -171,7 +191,22 @@ class PlayerStage(TileStage):
         self.player.draw(screen, self.camera)
 
 
-class SpecialTileStage(PlayerStage):
+class ItemStage(PlayerStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+
+        self.grapple = Grapple(self.player, self.camera, self.particle_manager)
+    
+    def draw(self, screen):
+        super().draw(screen)
+        # self.grapple.draw(screen)
+    
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+        # self.grapple.update(event_info, self.tilemap, self.enemies)
+
+
+class SpecialTileStage(ItemStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
 
