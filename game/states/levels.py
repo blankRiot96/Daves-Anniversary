@@ -13,8 +13,8 @@ from game.background import BackGroundEffect
 from game.common import HEIGHT, MAP_DIR, SETTINGS_DIR, AUDIO_DIR, WIDTH, EventInfo
 from game.enemy import MovingWall
 from game.player import Player
-from game.portal import Portal
-from game.sound_icon import SoundIcon
+from game.interactables.portal import Portal
+from game.interactables.sound_icon import SoundIcon
 from game.states.enums import Dimensions, States
 from game.utils import load_font, load_settings
 from library.effects import ExplosionManager

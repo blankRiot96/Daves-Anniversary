@@ -21,6 +21,11 @@
         "sprite_sheet": null,
         "convert_alpha": true,
         "states": ["level"]
+    },
+    "note.png": {
+        "sprite_sheet": null,
+        "convert_alpha": true,
+        "states": ["level"]
     }
 }
 
