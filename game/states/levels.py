@@ -12,6 +12,7 @@ import pygame
 from game.background import BackGroundEffect
 from game.common import HEIGHT, MAP_DIR, SETTINGS_DIR, AUDIO_DIR, WIDTH, EventInfo
 from game.enemy import MovingWall
+from game.interactables.notes import Note
 from game.player import Player
 from game.interactables.portal import Portal
 from game.interactables.sound_icon import SoundIcon
@@ -45,28 +46,14 @@ class InitLevelStage(abc.ABC):
         self.next_state: Optional[States] = None
 
         self.settings = {
-            "parallel_dimension": load_settings(
-                SETTINGS_DIR / f"{Dimensions.PARALLEL_DIMENSION.value}.json"
-            ),
-            "alien_dimension": load_settings(
-                SETTINGS_DIR / f"{Dimensions.ALIEN_DIMENSION.value}.json"
-            ),
-            "volcanic_dimension": load_settings(
-                SETTINGS_DIR / f"{Dimensions.VOLCANIC_DIMENSION.value}.json"
-            ),
-            # "water_dimension": load_settings(
-            #     SETTINGS_DIR / f"{Dimensions.WATER_DIMENSION.value}.json"
-            # ),
-            # "moon_dimension": load_settings(
-            #     SETTINGS_DIR / f"{Dimensions.MOON_DIMENSION.value}.json"
-            # ),
-            # "homeland_dimension": load_settings(
-            #     SETTINGS_DIR / f"{Dimensions.HOMELAND_DIMENSION.value}.json"
-            # ),
+            enm.value: load_settings(
+                SETTINGS_DIR / f"{enm.value}.json"
+            ) for enm in Dimensions
         }
         self.dimensions_traveled = {self.current_dimension}
         self.enemies = set()
         self.portals = set()
+        self.notes = set()
         self.particle_manager = ParticleManager(self.camera)
 
     def update(*args, **kwargs):
@@ -120,7 +107,13 @@ class RenderPortalStage(RenderBackgroundStage):
             portal.draw(screen, self.camera)
 
 
-class TileStage(RenderPortalStage):
+class RenderNoteStage(RenderPortalStage):
+    def draw(self, screen):
+        super().draw(screen)
+        for note in self.notes:
+            note.draw(screen, self.camera)
+
+class TileStage(RenderNoteStage):
     """
     Handles tilemap rendering
     """
@@ -189,6 +182,7 @@ class EnemyStage(SpecialTileStage):
         for enemy in self.enemies:
             enemy.update(event_info, self.tilemap, self.player)
 
+
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
 
@@ -196,14 +190,28 @@ class EnemyStage(SpecialTileStage):
             enemy.draw(self.event_info["dt"], screen, self.camera)
 
 
-class PortalStage(EnemyStage):
+class NoteStage(EnemyStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        self.notes = {
+            Note(self.assets["note"], (obj.x, obj.y), obj.properties["text"])
+            for obj in self.tilemap.tilemap.get_layer_by_name("notes")
+        }
+    
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+        for note in self.notes:
+            note.update(event_info, self.player.rect)
+    
+
+class PortalStage(NoteStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
 
         for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
             if portal_obj.name == "portal":
                 self.portals.add(
-                    Portal(portal_obj, [enm for enm in Dimensions], self.assets)
+                    Portal(portal_obj, [enm for enm in Dimensions], self.assets["portal"])
                 )
 
     def update(self, event_info: EventInfo):
@@ -216,7 +224,7 @@ class PortalStage(EnemyStage):
                 portal.current_dimension = self.current_dimension
             # otherwise (if we're switching dimension)
             else:
-                print(f"Changed dimension to: {portal.current_dimension}")
+                logger.info(f"Changed dimension to: {portal.current_dimension}")
 
                 self.current_dimension = portal.current_dimension
                 self.map_surf = self.tilemap.make_map(
@@ -239,7 +247,7 @@ class CameraStage(PortalStage):
         self.camera.adjust_to(event_info["dt"], self.player.rect)
 
 
-class UIStage(CameraStage):  # Skipped for now
+class UIStage(CameraStage): 
     """
     Handles buttons
     """

@@ -110,4 +110,5 @@ class MovingWall(Enemy):
 
     def draw(self, dt: float, screen: pygame.Surface, camera):
         # Placeholder
-        pygame.draw.rect(screen, (128, 128, 128), camera.apply(self.rect))
+        pygame.draw.rect(screen, (42, 45, 55), (camera.apply(self.rect).topleft, self.rect.size))
+        # pygame.draw.rect(screen, (42, 45, 55), (0, 0, self.rect.width, self.rect.height))

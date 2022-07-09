@@ -29,11 +29,7 @@ class Camera:
         Parameters:
             target_pos: the target position to adjust
         """
-
-        if isinstance(target_pos, tuple) or isinstance(target_pos, list):
-            target_pos = pygame.Rect(target_pos[0], target_pos[1], 0, 0)
-        elif isinstance(target_pos, pygame.Vector2):
-            target_pos = pygame.Rect(target_pos.x, target_pos.y, 0, 0)
+        target_pos = pygame.Rect(target_pos[0], target_pos[1], 0, 0)
 
         return target_pos.move((-self.camera.x, -self.camera.y))
 
