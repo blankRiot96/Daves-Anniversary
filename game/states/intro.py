@@ -18,7 +18,7 @@ pygame.mixer.init()
 
 
 class InitDialogueStage:
-    FRAME_COOLDOWN = 350
+    FRAME_COOLDOWN = 400
 
     def __init__(self, switch_info: dict):
         self.switch_info = switch_info
