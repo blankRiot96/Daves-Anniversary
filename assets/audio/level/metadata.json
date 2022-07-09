@@ -1,11 +1,10 @@
 {
     "explosion.wav": {
-        "volume": 0.4,
+        "volume": 0.1,
         "states": ["level"]
     },
     "bgm.mp3": {
-        "volume": 0.8,
+        "volume": 0.5,
         "states": ["level"]
-    } 
+    }
 }
-

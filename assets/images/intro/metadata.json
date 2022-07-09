@@ -13,6 +13,16 @@
         "sprite_sheet": null,
         "convert_alpha": false,
         "states": ["intro"]
+    },
+    "frame_4.png": {
+        "sprite_sheet": null,
+        "convert_alpha": false,
+        "states": ["intro"]
+    },
+    "frame_5.png": {
+        "sprite_sheet": null,
+        "convert_alpha": false,
+        "states": ["intro"]
     }
 }
 

@@ -10,12 +10,15 @@ from typing import Optional
 import pygame
 
 from game.background import BackGroundEffect
-from game.common import HEIGHT, MAP_DIR, SETTINGS_DIR, AUDIO_DIR, WIDTH, EventInfo
+from game.common import (AUDIO_DIR, HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH,
+                         EventInfo)
 from game.enemy import MovingWall
+
 from game.items.grapple import Grapple
+from game.interactables.notes import Note
+from game.interactables.portal import Portal
+from game.interactables.sound_icon import SoundIcon
 from game.player import Player
-from game.portal import Portal
-from game.sound_icon import SoundIcon
 from game.states.enums import Dimensions, States
 from game.utils import load_font, load_settings
 from library.effects import ExplosionManager
@@ -46,28 +49,13 @@ class InitLevelStage(abc.ABC):
         self.next_state: Optional[States] = None
 
         self.settings = {
-            "parallel_dimension": load_settings(
-                SETTINGS_DIR / f"{Dimensions.PARALLEL_DIMENSION.value}.json"
-            ),
-            "alien_dimension": load_settings(
-                SETTINGS_DIR / f"{Dimensions.ALIEN_DIMENSION.value}.json"
-            ),
-            "volcanic_dimension": load_settings(
-                SETTINGS_DIR / f"{Dimensions.VOLCANIC_DIMENSION.value}.json"
-            ),
-            # "water_dimension": load_settings(
-            #     SETTINGS_DIR / f"{Dimensions.WATER_DIMENSION.value}.json"
-            # ),
-            # "moon_dimension": load_settings(
-            #     SETTINGS_DIR / f"{Dimensions.MOON_DIMENSION.value}.json"
-            # ),
-            # "homeland_dimension": load_settings(
-            #     SETTINGS_DIR / f"{Dimensions.HOMELAND_DIMENSION.value}.json"
-            # ),
+            enm.value: load_settings(SETTINGS_DIR / f"{enm.value}.json")
+            for enm in Dimensions
         }
         self.dimensions_traveled = {self.current_dimension}
         self.enemies = set()
         self.portals = set()
+        self.notes = set()
         self.particle_manager = ParticleManager(self.camera)
         
         self.player = Player(
@@ -105,7 +93,7 @@ class RenderPortalStage(RenderBackgroundStage):
                 text_particle = TextParticle(
                     screen=screen,
                     image=font.render(
-                        f"Switched to: {formatted_txt}", True, (255, 255, 255)
+                        f"Switched to: {formatted_txt}", True, (218, 224, 234)
                     ),
                     pos=self.player.vec,
                     vel=(0, -1.5),
@@ -125,7 +113,14 @@ class RenderPortalStage(RenderBackgroundStage):
             portal.draw(screen, self.camera)
 
 
-class TileStage(RenderPortalStage):
+class RenderNoteStage(RenderPortalStage):
+    def draw(self, screen):
+        super().draw(screen)
+        for note in self.notes:
+            note.draw(screen, self.camera)
+
+
+class TileStage(RenderNoteStage):
     """
     Handles tilemap rendering
     """
@@ -231,14 +226,30 @@ class EnemyStage(SpecialTileStage):
             enemy.draw(self.event_info["dt"], screen, self.camera)
 
 
-class PortalStage(EnemyStage):
+class NoteStage(EnemyStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        self.notes = {
+            Note(self.assets["note"], (obj.x, obj.y), obj.properties["text"])
+            for obj in self.tilemap.tilemap.get_layer_by_name("notes")
+        }
+
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+        for note in self.notes:
+            note.update(event_info, self.player.rect)
+
+
+class PortalStage(NoteStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
 
         for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
             if portal_obj.name == "portal":
                 self.portals.add(
-                    Portal(portal_obj, [enm for enm in Dimensions], self.assets)
+                    Portal(
+                        portal_obj, [enm for enm in Dimensions], self.assets["portal"]
+                    )
                 )
 
     def update(self, event_info: EventInfo):
@@ -251,7 +262,7 @@ class PortalStage(EnemyStage):
                 portal.current_dimension = self.current_dimension
             # otherwise (if we're switching dimension)
             else:
-                print(f"Changed dimension to: {portal.current_dimension}")
+                logger.info(f"Changed dimension to: {portal.current_dimension}")
 
                 self.current_dimension = portal.current_dimension
                 self.map_surf = self.tilemap.make_map(
@@ -274,7 +285,7 @@ class CameraStage(PortalStage):
         self.camera.adjust_to(event_info["dt"], self.player.rect)
 
 
-class UIStage(CameraStage):  # Skipped for now
+class UIStage(CameraStage):
     """
     Handles buttons
     """
@@ -285,11 +296,10 @@ class UIStage(CameraStage):  # Skipped for now
 
         stub_rect = pygame.Rect(0, 0, 16, 16)
         stub_rect.topright = pygame.Surface((WIDTH, HEIGHT)).get_rect().topright
-        stub_rect.topright = (
-            stub_rect.topright[0] - 32,
-            stub_rect.topright[1] + 16
+        stub_rect.topright = (stub_rect.topright[0] - 32, stub_rect.topright[1] + 16)
+        self.sound_icon = SoundIcon(
+            self.sfx_manager, self.assets, center_pos=stub_rect.center
         )
-        self.sound_icon = SoundIcon(self.sfx_manager, self.assets, center_pos=stub_rect.center)
 
     def update(self, event_info: EventInfo):
         """
@@ -319,7 +329,7 @@ class UIStage(CameraStage):  # Skipped for now
         self.particle_manager.draw()
 
 
-class ExplosionStage(UIStage):  
+class ExplosionStage(UIStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         self.explosion_manager = ExplosionManager("fire")
