@@ -8,8 +8,8 @@ from typing import List
 
 import pygame
 
-from game.states.enums import Dimensions
 from game.interactables.abc import Interactable
+from game.states.enums import Dimensions
 
 
 class Portal(Interactable):
@@ -32,5 +32,3 @@ class Portal(Interactable):
                         # switch to the next dimension
                         self.dimension_change = True
                         self.current_dimension = next(self.dimension_cycle)
-
-
