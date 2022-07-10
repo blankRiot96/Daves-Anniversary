@@ -6,7 +6,7 @@
  <tile id="2" class="tile"/>
  <tile id="3" class="dec"/>
  <tile id="4" class="tile"/>
- <tile id="5" class="dec">
+ <tile id="5" class="tile">
   <properties>
    <property name="special_type" value="spike_nullified"/>
   </properties>

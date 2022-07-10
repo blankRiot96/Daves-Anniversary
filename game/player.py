@@ -21,6 +21,7 @@ class Player(Entity):
     Handles player
     """
 
+    MAX_HP = 100
     SIZE = (10, 16)
     WALK_ANIM_SPEED = 0.05
     SPACE_KEYS = pygame.K_w, pygame.K_SPACE
@@ -47,6 +48,8 @@ class Player(Entity):
         self.is_jump = False
 
         self.grapple = Grapple(self, self.camera, self.particle_manager)
+
+        self.hp = self.MAX_HP
 
     def change_settings(self, settings: dict) -> None:
         self.speed = settings["player_speed"]

@@ -110,6 +110,8 @@ class Grapple:
         self.grapple_startpoint = self.player.vec.copy()
         self.grappling = False
 
+        self.grapple_startpoint.x += self.player.SIZE[0] // 2
+
         for event in event_info["events"]:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.time_started_hold = pygame.time.get_ticks()
@@ -125,7 +127,8 @@ class Grapple:
             pass
         elif self.time_started_hold != 0 and pygame.time.get_ticks() - self.time_started_hold > 100:
             if not self.on_grapple:
-                self.grapple_endpoint = self.player.vec.copy()
+                self.grapple_endpoint = self.grapple_startpoint.copy()
+
                 mouse_pos = pygame.mouse.get_pos()
                 adj_grapple_startpoint = self.camera.apply(self.grapple_startpoint)
 
@@ -149,10 +152,10 @@ class Grapple:
         self.screen = screen  # GOOFINESS ALERT
 
         if self.grappling:
-            e, f = self.camera.apply(self.grapple_startpoint), self.camera.apply(self.grapple_endpoint)
-            g, h = pygame.Vector2(e.x, e.y), pygame.Vector2(f.x, f.y)
+            appl_start, appl_end = self.camera.apply(self.grapple_startpoint), self.camera.apply(self.grapple_endpoint)
+            vec_start, vec_end = pygame.Vector2(appl_start.x, appl_start.y), pygame.Vector2(appl_end.x, appl_end.y)
 
-            pygame.draw.line(screen, (255, 255, 255), g, h, width=2)
+            pygame.draw.line(screen, (255, 255, 255), vec_start, vec_end, width=2)
 
 
 class Swing:
@@ -248,6 +251,7 @@ class Swing:
         elif self.time_started_hold != 0 and pygame.time.get_ticks() - self.time_started_hold > 100:
             if not self.on_grapple:
                 self.grapple_endpoint = self.player.vec.copy()
+                self.grapple_endpoint.x += 16
                 mouse_pos = pygame.mouse.get_pos()
                 adj_grapple_startpoint = self.camera.apply(self.grapple_startpoint)
 
