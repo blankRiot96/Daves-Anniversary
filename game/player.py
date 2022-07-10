@@ -46,12 +46,19 @@ class Player(Entity):
         self.jump_exp = ExplosionManager("smoke-jump")
         self.is_jump = False
 
-        self.grapple = Grapple(self, self.camera, self.particle_manager)
+        self.grapple = Grapple(self, self.camera, self.particle_manager, settings)
+
+    def _config_grapple(self, settings):
+        self.grapple.GRAPPLE_RANGE = settings["grapple_range"]
+        self.grapple.GRAPPLE_SPEED = settings["grapple_speed"]
 
     def change_settings(self, settings: dict) -> None:
         self.speed = settings["player_speed"]
         self.jump_height = settings["player_jump"]
         self.gravity_acc = settings["gravity"]
+
+        if hasattr(self, "grapple"):
+            self._config_grapple(settings)
 
     def handle_player_input(self, event_info: EventInfo) -> None:
         """

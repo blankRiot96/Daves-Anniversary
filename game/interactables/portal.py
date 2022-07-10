@@ -19,6 +19,9 @@ class Portal(Interactable):
         self.current_dimension = next(self.dimension_cycle)
         self.dimension_change = False
 
+    def unlock_dimension(self, dimensions):
+        self.dimension_cycle = itertools.cycle(dimensions)
+
     def update(self, player_rect, events):
         super().update(player_rect)
         self.dimension_change = False

@@ -5,10 +5,11 @@ The source code is distributed under the MIT license.
 
 import asyncio
 import logging
+import json
 
 import pygame
 
-from game.common import HEIGHT, WIDTH
+from game.common import HEIGHT, SAVE_DATA, WIDTH, DATA_DIR, AUDIO_DIR
 from game.states.enums import States
 from game.states.intro import Dialogue
 from game.states.levels import Level
@@ -32,7 +33,10 @@ class Game:
 
         self.alive = True
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED)
-        self.state: States = States.DIALOGUE
+        if SAVE_DATA["first_time"]:
+            self.state: States = States.DIALOGUE
+        else:
+            self.state = States.MAIN_MENU
 
         # Dictionary to initialize respective game state
         self.perspective_states = {
@@ -71,9 +75,10 @@ class Game:
     def _handle_state_switch(self):
         """
         Handle dynamic switching of game states
-
         """
+        
         if self.game_state.next_state is not None:
+            self._save()
             self.state = self.game_state.next_state
             # Creating a new game state from the new state, and passing in
             # the respective switch info for the next game state
@@ -81,6 +86,21 @@ class Game:
             self.game_state = self.perspective_states[self.state](
                 self.game_state.switch_info
             )
+
+
+    def _save(self) -> None:
+        """
+        Saves all game related config
+        for future games.
+        """ 
+        SAVE_DATA["first_time"] = False
+        if self.state == States.LEVEL:
+            SAVE_DATA["last_volume"] = self.game_state.sound_icon.slider.value / 100
+            print(SAVE_DATA["last_volume"])
+        
+        with open(DATA_DIR / "save.json", "w") as f:
+            json.dump(SAVE_DATA, f, indent=2)
+
 
     async def _run(self):
         """
@@ -90,6 +110,7 @@ class Game:
             event_info = self._grab_events()
             for event in event_info["events"]:
                 if event.type == pygame.QUIT:
+                    self._save()
                     self.alive = False
 
             self.game_state.update(event_info)

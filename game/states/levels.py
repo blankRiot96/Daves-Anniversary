@@ -10,7 +10,7 @@ from typing import Optional
 import pygame
 
 from game.background import BackGroundEffect
-from game.common import (AUDIO_DIR, HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH,
+from game.common import (SAVE_DATA, HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH,
                          EventInfo)
 from game.enemy import MovingWall
 
@@ -190,7 +190,6 @@ class ItemStage(PlayerStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
 
-        self.grapple = Grapple(self.player, self.camera, self.particle_manager)
     
     def draw(self, screen):
         super().draw(screen)
@@ -243,12 +242,14 @@ class NoteStage(EnemyStage):
 class PortalStage(NoteStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
+        self.unlocked_dimensions = [Dimensions.PARALLEL_DIMENSION,
+        Dimensions.VOLCANIC_DIMENSION]
 
         for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
             if portal_obj.name == "portal":
                 self.portals.add(
                     Portal(
-                        portal_obj, [enm for enm in Dimensions], self.assets["portal"]
+                        portal_obj, self.unlocked_dimensions, self.assets["portal"]
                     )
                 )
 
@@ -277,6 +278,19 @@ class PortalStage(NoteStage):
 
             portal.update(self.player, event_info)
 
+        # Unlocking dimensions
+        for event in event_info["events"]:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_5:
+                for dimension in Dimensions:
+                    if dimension not in self.unlocked_dimensions:
+                        self.unlocked_dimensions.append(
+                            dimension
+                        )
+                        break
+                
+                for portal in self.portals:
+                    portal.unlock_dimension(self.unlocked_dimensions)
+
 
 class CameraStage(PortalStage):
     def update(self, event_info: EventInfo):
@@ -294,12 +308,6 @@ class UIStage(CameraStage):
         super().__init__(switch_info)
         self.buttons = ()
 
-        stub_rect = pygame.Rect(0, 0, 16, 16)
-        stub_rect.topright = pygame.Surface((WIDTH, HEIGHT)).get_rect().topright
-        stub_rect.topright = (stub_rect.topright[0] - 32, stub_rect.topright[1] + 16)
-        self.sound_icon = SoundIcon(
-            self.sfx_manager, self.assets, center_pos=stub_rect.center
-        )
 
     def update(self, event_info: EventInfo):
         """
@@ -312,7 +320,6 @@ class UIStage(CameraStage):
         for button in self.buttons:
             button.update(event_info["mouse_pos"], event_info["mouse_press"])
 
-        self.sound_icon.update(event_info)
         self.particle_manager.update(event_info)
 
     def draw(self, screen: pygame.Surface):
@@ -325,11 +332,32 @@ class UIStage(CameraStage):
         super().draw(screen)
         for button in self.buttons:
             button.draw(screen)
-        self.sound_icon.draw(screen)
         self.particle_manager.draw()
 
 
-class ExplosionStage(UIStage):
+class SFXStage(UIStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        stub_rect = pygame.Rect(0, 0, 16, 16)
+        stub_rect.topright = pygame.Surface((WIDTH, HEIGHT)).get_rect().topright
+        stub_rect.topright = (stub_rect.topright[0] - 32, stub_rect.topright[1] + 16)
+        self.sound_icon = SoundIcon(
+            self.sfx_manager, self.assets, center_pos=stub_rect.center
+        )
+
+        self.sfx_manager.set_volume(SAVE_DATA["last_volume"] * 100)
+        self.sound_icon.slider.value = SAVE_DATA["last_volume"] * self.sound_icon.slider.max_value
+
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+        self.sound_icon.update(event_info)
+    
+    def draw(self, screen: pygame.Surface):
+        super().draw(screen)
+        self.sound_icon.draw(screen)
+
+
+class ExplosionStage(SFXStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         self.explosion_manager = ExplosionManager("fire")
@@ -338,10 +366,11 @@ class ExplosionStage(UIStage):
         super().update(event_info)
         self.explosion_manager.update(event_info["dt"])
 
-        for event in event_info["events"]:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                self.explosion_manager.create_explosion(event.pos)
-                self.sfx_manager.play("explosion")
+        # for event in event_info["events"]:
+        #     if event.type == pygame.MOUSEBUTTONDOWN:
+                # self.explosion_manager.create_explosion(event.pos)
+                # self.sfx_manager.play("explosion")
+                
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
