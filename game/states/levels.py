@@ -13,11 +13,10 @@ from game.background import BackGroundEffect
 from game.common import (SAVE_DATA, HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH,
                          EventInfo)
 from game.enemy import MovingWall
-
-from game.items.grapple import Grapple
 from game.interactables.notes import Note
 from game.interactables.portal import Portal
 from game.interactables.sound_icon import SoundIcon
+from game.items.grapple import Grapple
 from game.player import Player
 from game.states.enums import Dimensions, States
 from game.utils import load_font, load_settings
@@ -57,9 +56,12 @@ class InitLevelStage(abc.ABC):
         self.portals = set()
         self.notes = set()
         self.particle_manager = ParticleManager(self.camera)
-        
+
         self.player = Player(
-            self.settings[self.current_dimension.value], self.assets["dave_walk"], self.camera, self.particle_manager
+            self.settings[self.current_dimension.value],
+            self.assets["dave_walk"],
+            self.camera,
+            self.particle_manager,
         )
 
     def update(*args, **kwargs):
@@ -120,7 +122,14 @@ class RenderNoteStage(RenderPortalStage):
             note.draw(screen, self.camera)
 
 
-class TileStage(RenderNoteStage):
+class RenderEnemyStage(RenderNoteStage):
+    def draw(self, screen: pygame.Surface):
+        super().draw(screen)
+        for enemy in self.enemies:
+            enemy.draw(self.event_info["dt"], screen, self.camera)
+
+
+class TileStage(RenderEnemyStage):
     """
     Handles tilemap rendering
     """
@@ -135,7 +144,11 @@ class TileStage(RenderNoteStage):
         for enemy_obj in self.tilemap.tilemap.get_layer_by_name("enemies"):
             if enemy_obj.name == "moving_wall":
                 self.enemies.add(
-                    MovingWall(self.settings[self.current_dimension.value], enemy_obj)
+                    MovingWall(
+                        self.settings[self.current_dimension.value],
+                        enemy_obj,
+                        self.assets,
+                    )
                 )
 
         self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
@@ -190,11 +203,10 @@ class ItemStage(PlayerStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
 
-    
     def draw(self, screen):
         super().draw(screen)
         # self.grapple.draw(screen)
-    
+
     def update(self, event_info: EventInfo):
         super().update(event_info)
         # self.grapple.update(event_info, self.tilemap, self.enemies)
@@ -217,12 +229,6 @@ class EnemyStage(SpecialTileStage):
 
         for enemy in self.enemies:
             enemy.update(event_info, self.tilemap, self.player)
-
-    def draw(self, screen: pygame.Surface):
-        super().draw(screen)
-
-        for enemy in self.enemies:
-            enemy.draw(self.event_info["dt"], screen, self.camera)
 
 
 class NoteStage(EnemyStage):
@@ -368,9 +374,6 @@ class ExplosionStage(SFXStage):
 
         # for event in event_info["events"]:
         #     if event.type == pygame.MOUSEBUTTONDOWN:
-                # self.explosion_manager.create_explosion(event.pos)
-                # self.sfx_manager.play("explosion")
-                
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
