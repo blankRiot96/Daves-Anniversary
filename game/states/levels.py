@@ -10,12 +10,13 @@ from typing import Optional
 import pygame
 
 from game.background import BackGroundEffect
-from game.common import HEIGHT, MAP_DIR, SETTINGS_DIR, AUDIO_DIR, WIDTH, EventInfo
+from game.common import (AUDIO_DIR, HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH,
+                         EventInfo)
 from game.enemy import MovingWall
 from game.interactables.notes import Note
-from game.player import Player
 from game.interactables.portal import Portal
 from game.interactables.sound_icon import SoundIcon
+from game.player import Player
 from game.states.enums import Dimensions, States
 from game.utils import load_font, load_settings
 from library.effects import ExplosionManager
@@ -46,9 +47,8 @@ class InitLevelStage(abc.ABC):
         self.next_state: Optional[States] = None
 
         self.settings = {
-            enm.value: load_settings(
-                SETTINGS_DIR / f"{enm.value}.json"
-            ) for enm in Dimensions
+            enm.value: load_settings(SETTINGS_DIR / f"{enm.value}.json")
+            for enm in Dimensions
         }
         self.dimensions_traveled = {self.current_dimension}
         self.enemies = set()
@@ -112,6 +112,7 @@ class RenderNoteStage(RenderPortalStage):
         super().draw(screen)
         for note in self.notes:
             note.draw(screen, self.camera)
+
 
 class TileStage(RenderNoteStage):
     """
@@ -182,7 +183,6 @@ class EnemyStage(SpecialTileStage):
         for enemy in self.enemies:
             enemy.update(event_info, self.tilemap, self.player)
 
-
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
 
@@ -197,12 +197,12 @@ class NoteStage(EnemyStage):
             Note(self.assets["note"], (obj.x, obj.y), obj.properties["text"])
             for obj in self.tilemap.tilemap.get_layer_by_name("notes")
         }
-    
+
     def update(self, event_info: EventInfo):
         super().update(event_info)
         for note in self.notes:
             note.update(event_info, self.player.rect)
-    
+
 
 class PortalStage(NoteStage):
     def __init__(self, switch_info: dict) -> None:
@@ -211,7 +211,9 @@ class PortalStage(NoteStage):
         for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
             if portal_obj.name == "portal":
                 self.portals.add(
-                    Portal(portal_obj, [enm for enm in Dimensions], self.assets["portal"])
+                    Portal(
+                        portal_obj, [enm for enm in Dimensions], self.assets["portal"]
+                    )
                 )
 
     def update(self, event_info: EventInfo):
@@ -247,7 +249,7 @@ class CameraStage(PortalStage):
         self.camera.adjust_to(event_info["dt"], self.player.rect)
 
 
-class UIStage(CameraStage): 
+class UIStage(CameraStage):
     """
     Handles buttons
     """
@@ -258,11 +260,10 @@ class UIStage(CameraStage):
 
         stub_rect = pygame.Rect(0, 0, 16, 16)
         stub_rect.topright = pygame.Surface((WIDTH, HEIGHT)).get_rect().topright
-        stub_rect.topright = (
-            stub_rect.topright[0] - 32,
-            stub_rect.topright[1] + 16
+        stub_rect.topright = (stub_rect.topright[0] - 32, stub_rect.topright[1] + 16)
+        self.sound_icon = SoundIcon(
+            self.sfx_manager, self.assets, center_pos=stub_rect.center
         )
-        self.sound_icon = SoundIcon(self.sfx_manager, self.assets, center_pos=stub_rect.center)
 
     def update(self, event_info: EventInfo):
         """
@@ -292,7 +293,7 @@ class UIStage(CameraStage):
         self.particle_manager.draw()
 
 
-class ExplosionStage(UIStage):  
+class ExplosionStage(UIStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         self.explosion_manager = ExplosionManager("fire")

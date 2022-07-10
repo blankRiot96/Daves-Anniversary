@@ -62,11 +62,10 @@ class SFXManager:
 
     def set_volume(self, percentage: float):
 
-
         for sound_obj in self.sounds.values():
             volume = (percentage / 100) * sound_obj.original_volume
             sound_obj.sound.set_volume(volume)
-        
+
         if pygame.mixer.music.get_busy():
             volume = (percentage / 100) * self.sounds["bgm"].original_volume
             pygame.mixer.music.set_volume(volume)
