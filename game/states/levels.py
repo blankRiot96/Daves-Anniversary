@@ -120,7 +120,14 @@ class RenderNoteStage(RenderPortalStage):
             note.draw(screen, self.camera)
 
 
-class TileStage(RenderNoteStage):
+class RenderEnemyStage(RenderNoteStage):
+    def draw(self, screen: pygame.Surface):
+        super().draw(screen)
+        for enemy in self.enemies:
+            enemy.draw(self.event_info["dt"], screen, self.camera)
+
+
+class TileStage(RenderEnemyStage):
     """
     Handles tilemap rendering
     """
@@ -135,7 +142,7 @@ class TileStage(RenderNoteStage):
         for enemy_obj in self.tilemap.tilemap.get_layer_by_name("enemies"):
             if enemy_obj.name == "moving_wall":
                 self.enemies.add(
-                    MovingWall(self.settings[self.current_dimension.value], enemy_obj)
+                    MovingWall(self.settings[self.current_dimension.value], enemy_obj, self.assets)
                 )
 
         self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
@@ -218,12 +225,6 @@ class EnemyStage(SpecialTileStage):
 
         for enemy in self.enemies:
             enemy.update(event_info, self.tilemap, self.player)
-
-    def draw(self, screen: pygame.Surface):
-        super().draw(screen)
-
-        for enemy in self.enemies:
-            enemy.draw(self.event_info["dt"], screen, self.camera)
 
 
 class NoteStage(EnemyStage):
@@ -338,10 +339,10 @@ class ExplosionStage(UIStage):
         super().update(event_info)
         self.explosion_manager.update(event_info["dt"])
 
-        for event in event_info["events"]:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                self.explosion_manager.create_explosion(event.pos)
-                self.sfx_manager.play("explosion")
+        # for event in event_info["events"]:
+        #     if event.type == pygame.MOUSEBUTTONDOWN:
+        #         self.explosion_manager.create_explosion(event.pos)
+        #         self.sfx_manager.play("explosion")
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
