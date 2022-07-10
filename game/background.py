@@ -22,6 +22,7 @@ _BACKGROUND_COLORS = {
     Dimensions.PARALLEL_DIMENSION: (25, 22, 20),
     Dimensions.ALIEN_DIMENSION: (14, 13, 20),
     Dimensions.VOLCANIC_DIMENSION: (19, 16, 15),
+    Dimensions.MOON_DIMENSION: (20, 16, 19)
 }
 
 
@@ -61,7 +62,7 @@ class _Line:
 
     def draw(self, screen):
         pygame.draw.line(
-            screen, "black", self.start_pos, self.end_pos, width=self.LINE_WIDTH
+            screen, (6, 6, 8), self.start_pos, self.end_pos, width=self.LINE_WIDTH
         )
 
 
@@ -97,7 +98,7 @@ class _RotatingRect:
             self.particles.add(
                 AngularParticle(
                     self.vec - (random.uniform(-self.size[0] / 2, self.size[0] / 2), 0),
-                    "white",
+                    (179, 185, 209),
                     3,
                     0.3,
                     "square",
@@ -115,7 +116,7 @@ class _RotatingRect:
 
     def update(self, dt):
         self.angle += self.ROTAT_SPEED * dt
-        pygame.draw.rect(self.original_surf, "black", self.rect, width=self.WIDTH)
+        pygame.draw.rect(self.original_surf, (6, 6, 8), self.rect, width=self.WIDTH)
         self.surf = pygame.transform.rotate(self.original_surf, self.angle)
         self.rect = self.surf.get_rect(center=self.original_rect.center)
 

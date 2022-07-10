@@ -35,7 +35,7 @@ class Entity(abc.ABC):
 
     def handle_tile_collisions(
         self, neighboring_tiles: typing.List[typing.Any]
-    ) -> None:
+    ) -> list:
         """
         Handles the tile collision
 
@@ -43,7 +43,6 @@ class Entity(abc.ABC):
             dt: the deltatime for framerate independent movement
             neighboring_tiles: the player's current closest tiles
         """
-
         self.rect.x += round(self.vel.x)
 
         for neighboring_tile in neighboring_tiles:

@@ -8,6 +8,7 @@ import pygame
 
 from game.common import TILE_HEIGHT, TILE_WIDTH, EventInfo
 from game.entity import Entity, EntityFacing, EntityStates
+from game.items.grapple import Grapple, Swing
 from game.utils import get_neighboring_tiles, pixel_to_tile
 from library.effects.explosions import ExplosionManager
 from library.utils.animation import Animation
@@ -24,7 +25,7 @@ class Player(Entity):
     WALK_ANIM_SPEED = 0.05
     SPACE_KEYS = pygame.K_w, pygame.K_SPACE
 
-    def __init__(self, settings: dict, walk_frames: typing.List[pygame.Surface]):
+    def __init__(self, settings: dict, walk_frames: typing.List[pygame.Surface], camera, particle_manager):
         super().__init__(settings)
         # set player stats
         self.change_settings(settings)
@@ -38,9 +39,14 @@ class Player(Entity):
         self.speed = settings["player_speed"]
         self.jump_height = settings["player_jump"]
 
+        self.camera = camera
+        self.particle_manager = particle_manager
+
         self.rect = pygame.Rect((0, 0), self.SIZE)
         self.jump_exp = ExplosionManager("smoke-jump")
         self.is_jump = False
+
+        self.grapple = Grapple(self, self.camera, self.particle_manager)
 
     def change_settings(self, settings: dict) -> None:
         self.speed = settings["player_speed"]
@@ -104,11 +110,14 @@ class Player(Entity):
         for enemy in enemies:
             collidable_rects.append(enemy)
 
-        self.handle_tile_collisions(collidable_rects)
-
         # Add and cap gravity
         self.vel.y += self.gravity_acc * dt
         self.vel.y = min(17, self.vel.y)
+        
+        # self.swing.update(event_info, tilemap, enemies)
+        self.grapple.update(event_info, tilemap, enemies)
+
+        self.handle_tile_collisions(collidable_rects)
 
         # Update position attributes to rect.topleft
         self.vec.x, self.vec.y = self.rect.topleft
@@ -136,6 +145,8 @@ class Player(Entity):
             camera: camera.Camera to adjust position
         """
         self.handle_jump_exp(screen, camera)
+        # self.swing.draw(screen)
+        self.grapple.draw(screen)
 
         animation = self.animations[f"walk_{self.facing.name.lower()}"]
 

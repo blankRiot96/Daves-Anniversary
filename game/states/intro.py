@@ -9,23 +9,30 @@ import pygame
 
 from game.common import HEIGHT, WIDTH, EventInfo
 from game.states.enums import States
+from library.sfx import SFXManager
 from library.sprite.load import load_assets
 from library.transition import FadeTransition
 from library.ui.buttons import Button
 
+pygame.mixer.init()
+
 
 class InitDialogueStage:
-    FRAME_COOLDOWN = 225
+    FRAME_COOLDOWN = 400
 
     def __init__(self, switch_info: dict):
         self.switch_info = switch_info
 
         self.assets = load_assets("intro")
-        self.frames = [self.assets[f"frame_{n}"] for n in range(1, 4)]
+        self.frames = [
+            pygame.transform.scale(self.assets[f"frame_{n}"], (WIDTH, HEIGHT))
+            for n in range(1, len(self.assets) + 1)
+        ]
         self.current_frame_index = 0
         self.frame_cooldown = self.FRAME_COOLDOWN
-
         self.switching = False
+
+        self.sfx_manager = SFXManager("intro")
 
         self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
 
@@ -48,12 +55,16 @@ class ButtonDialogueStage(FrameDialogueStage):
         super().__init__(switch_info)
 
         self.skip_button = Button(
-            pos=(WIDTH - 128, HEIGHT - 64),
-            size=(128, 64),
-            colors={"static": "grey", "hover": "white", "text": "black"},
+            pos=(WIDTH - 100, HEIGHT - 50),
+            size=(100, 50),
+            colors={
+                "static": (179, 185, 209),
+                "hover": (218, 224, 234),
+                "text": (20, 16, 19),
+            },
             font_name="PixelMillenium",
             text="skip",
-            corner_radius=8,
+            corner_radius=4,
         )
         self.skip_button.rect
 
@@ -89,6 +100,8 @@ class TransitionDialogueStage(ButtonDialogueStage):
                 self.switching = False
 
         if self.current_frame_index > len(self.frames) - 1:
+            # stop the music
+            pygame.mixer.fadeout(500)
             # just capping the index to avoid index error
             self.current_frame_index = len(self.frames) - 1
             # switching to the next state (made it level for debugging purposes)

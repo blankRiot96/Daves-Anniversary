@@ -8,7 +8,7 @@
  <tile id="4" class="tile"/>
  <tile id="5" class="dec">
   <properties>
-   <property name="special_type" value="spike"/>
+   <property name="special_type" value="spike_nullified"/>
   </properties>
  </tile>
  <tile id="6" class="tile"/>
