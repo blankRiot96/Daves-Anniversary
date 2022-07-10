@@ -25,6 +25,7 @@ class SoundIcon:
         self.rect = self.img.get_rect(center=center_pos)
         self.last_percent = 100
 
+        self.slider_rect = slider_rect.copy()
         self.larger_rect = pygame.Rect(
             (0, 0),
             (

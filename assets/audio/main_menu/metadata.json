@@ -1,0 +1,6 @@
+{
+    "bgm.mp3": {
+        "volume": 0.5,
+        "states": ["main_menu"]
+    }
+}

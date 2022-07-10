@@ -14,9 +14,11 @@ from library.particles import TextParticle
 
 class Grapple:
     GRAPPLE_RANGE = 12
-    GRAPPLE_SPEED = 6
+    GRAPPLE_SPEED = 12
 
-    def __init__(self, player, camera, particle_manager):
+    def __init__(self, player, camera, particle_manager, settings):
+        self.GRAPPLE_RANGE = settings["grapple_range"]
+        self.GRAPPLE_SPEED = settings["grapple_speed"]
         self.player = player
         self.camera = camera
         self.particle_manager = particle_manager
