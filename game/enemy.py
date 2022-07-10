@@ -85,7 +85,6 @@ class MovingWall(Enemy):
         for y in range(_range):
             self.surf.blit(img, (0, (y * img.get_height())))
 
-
     def update(self, event_info: EventInfo, tilemap, player) -> None:
         self.vel.x = 0
 

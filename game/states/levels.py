@@ -13,11 +13,10 @@ from game.background import BackGroundEffect
 from game.common import (AUDIO_DIR, HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH,
                          EventInfo)
 from game.enemy import MovingWall
-
-from game.items.grapple import Grapple
 from game.interactables.notes import Note
 from game.interactables.portal import Portal
 from game.interactables.sound_icon import SoundIcon
+from game.items.grapple import Grapple
 from game.player import Player
 from game.states.enums import Dimensions, States
 from game.utils import load_font, load_settings
@@ -57,9 +56,12 @@ class InitLevelStage(abc.ABC):
         self.portals = set()
         self.notes = set()
         self.particle_manager = ParticleManager(self.camera)
-        
+
         self.player = Player(
-            self.settings[self.current_dimension.value], self.assets["dave_walk"], self.camera, self.particle_manager
+            self.settings[self.current_dimension.value],
+            self.assets["dave_walk"],
+            self.camera,
+            self.particle_manager,
         )
 
     def update(*args, **kwargs):
@@ -142,7 +144,11 @@ class TileStage(RenderEnemyStage):
         for enemy_obj in self.tilemap.tilemap.get_layer_by_name("enemies"):
             if enemy_obj.name == "moving_wall":
                 self.enemies.add(
-                    MovingWall(self.settings[self.current_dimension.value], enemy_obj, self.assets)
+                    MovingWall(
+                        self.settings[self.current_dimension.value],
+                        enemy_obj,
+                        self.assets,
+                    )
                 )
 
         self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
@@ -198,11 +204,11 @@ class ItemStage(PlayerStage):
         super().__init__(switch_info)
 
         self.grapple = Grapple(self.player, self.camera, self.particle_manager)
-    
+
     def draw(self, screen):
         super().draw(screen)
         # self.grapple.draw(screen)
-    
+
     def update(self, event_info: EventInfo):
         super().update(event_info)
         # self.grapple.update(event_info, self.tilemap, self.enemies)

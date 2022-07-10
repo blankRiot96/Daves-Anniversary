@@ -26,7 +26,13 @@ class Player(Entity):
     WALK_ANIM_SPEED = 0.05
     SPACE_KEYS = pygame.K_w, pygame.K_SPACE
 
-    def __init__(self, settings: dict, walk_frames: typing.List[pygame.Surface], camera, particle_manager):
+    def __init__(
+        self,
+        settings: dict,
+        walk_frames: typing.List[pygame.Surface],
+        camera,
+        particle_manager,
+    ):
         super().__init__(settings)
         # set player stats
         self.change_settings(settings)
@@ -116,7 +122,7 @@ class Player(Entity):
         # Add and cap gravity
         self.vel.y += self.gravity_acc * dt
         self.vel.y = min(17, self.vel.y)
-        
+
         # self.swing.update(event_info, tilemap, enemies)
         self.grapple.update(event_info, tilemap, enemies)
 
