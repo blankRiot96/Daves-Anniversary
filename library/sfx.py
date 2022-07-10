@@ -7,6 +7,7 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+from game.common import SAVE_DATA
 
 import pygame
 
@@ -61,7 +62,6 @@ class SFXManager:
         sound.play()
 
     def set_volume(self, percentage: float):
-
         for sound_obj in self.sounds.values():
             volume = (percentage / 100) * sound_obj.original_volume
             sound_obj.sound.set_volume(volume)

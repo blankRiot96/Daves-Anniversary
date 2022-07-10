@@ -35,6 +35,7 @@ class Button:
 
         self.rect = pygame.Rect(pos, size)
 
+        self.text = text
         font = library.utils.font(size=size[1], name=font_name)
         self.text_surf = font.render(text, False, colors["text"])
         self.text_pos = self.text_surf.get_rect(center=self.rect.center).topleft

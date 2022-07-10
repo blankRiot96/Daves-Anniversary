@@ -22,8 +22,8 @@ class Dimensions(enum.Enum):
     """
 
     PARALLEL_DIMENSION = "parallel_dimension"
-    ALIEN_DIMENSION = "alien_dimension"
     VOLCANIC_DIMENSION = "volcanic_dimension"
-    MOON_DIMENSION = "moon_dimension"
+    ALIEN_DIMENSION = "alien_dimension"
     # WATER_DIMENSION = "water_dimension"
+    MOON_DIMENSION = "moon_dimension"
     # HOMELAND_DIMENSION = "homeland_dimension"
