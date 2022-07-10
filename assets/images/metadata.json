@@ -29,6 +29,11 @@
         },
         "convert_alpha": true,
         "states": ["level"]
+    },
+    "moving_wall.png": {
+        "sprite_sheet": null,
+        "convert_alpha": false,
+        "states": ["level"]
     }
 }
 
