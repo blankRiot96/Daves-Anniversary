@@ -21,13 +21,13 @@ class Note(Interactable):
     it.
     """
 
-    FONT = pygame.font.Font(FONT_DIR / "PixelMillenium.ttf", 8)
+    FONT = pygame.font.Font(FONT_DIR / "PixelMillenium.ttf", 16)
 
     def __init__(self, imgs, pos: Pos, text: str) -> None:
         super().__init__(imgs[0], imgs[1], pos)
         self.alpha_expansion = Expansion(0, 0, 255, speed=3.3)
         self.text = text
-        self.text_surf = self.FONT.render(self.text, True, (100, 100, 100))
+        self.text_surf = self.FONT.render(self.text, True, (179, 185, 209))
         self.text_rect = self.text_surf.get_rect(midbottom=(pos[0], pos[1] - 20))
 
     def update(self, event_info: EventInfo, player_rect: pygame.Rect) -> None:

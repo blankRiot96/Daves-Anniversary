@@ -22,7 +22,7 @@ _BACKGROUND_COLORS = {
     Dimensions.PARALLEL_DIMENSION: (25, 22, 20),
     Dimensions.ALIEN_DIMENSION: (14, 13, 20),
     Dimensions.VOLCANIC_DIMENSION: (19, 16, 15),
-    Dimensions.MOON_DIMENSION: (20, 16, 19)
+    Dimensions.MOON_DIMENSION: (20, 16, 19),
 }
 
 
