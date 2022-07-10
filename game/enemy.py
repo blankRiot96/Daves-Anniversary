@@ -70,13 +70,21 @@ class Enemy(Entity):
 
 
 class MovingWall(Enemy):
-    def __init__(self, settings: dict, obj):
+    def __init__(self, settings: dict, obj, assets: dict):
         super().__init__(settings, obj)
 
         self.wander_point_a = tile_to_pixel(string_pos_to_tuple(obj.wander_point_a))
         self.wander_point_b = tile_to_pixel(string_pos_to_tuple(obj.wander_point_b))
 
         self.last_turned = 0
+
+        img = assets["moving_wall"]
+        self.surf = pygame.Surface(self.size)
+
+        _range = int(self.size[1] / img.get_height())
+        for y in range(_range):
+            self.surf.blit(img, (0, (y * img.get_height())))
+
 
     def update(self, event_info: EventInfo, tilemap, player) -> None:
         self.vel.x = 0
@@ -110,7 +118,8 @@ class MovingWall(Enemy):
 
     def draw(self, dt: float, screen: pygame.Surface, camera):
         # Placeholder
-        pygame.draw.rect(
-            screen, (42, 45, 55), (camera.apply(self.rect).topleft, self.rect.size)
-        )
+        # pygame.draw.rect(
+        #     screen, (42, 45, 55), (camera.apply(self.rect).topleft, self.rect.size)
+        # )
+        screen.blit(self.surf, camera.apply(self.rect).topleft)
         # pygame.draw.rect(screen, (42, 45, 55), (0, 0, self.rect.width, self.rect.height))
