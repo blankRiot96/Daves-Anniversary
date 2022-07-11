@@ -191,7 +191,9 @@ class ParallaxBackground:
 
         self.layers = layers
 
-    def draw_layer(self, screen: pygame.Surface, layer: pygame.Surface, scroll: Tuple, speed: float):
+    def draw_layer(
+        self, screen: pygame.Surface, layer: pygame.Surface, scroll: Tuple, speed: float
+    ):
         """
         Draws a layer of the background on the screen
 
