@@ -11,10 +11,8 @@ class Checkpoint:
     def __init__(
         self,
         rect,
-        id_,
         particle_manager
     ):
-        self.id = id_
         self.rect = rect
         print(self.rect)
 

@@ -80,11 +80,7 @@
   </object>
  </objectgroup>
  <objectgroup id="5" name="checkpoints">
-  <object id="33" name="checkpoint" x="800" y="0" width="16" height="144">
-   <properties>
-    <property name="checkpoint_id" type="int" value="0"/>
-   </properties>
-  </object>
+  <object id="33" name="checkpoint" x="800" y="0" width="16" height="144"/>
  </objectgroup>
  <layer id="1" name="terrain" width="160" height="148">
   <data encoding="csv">

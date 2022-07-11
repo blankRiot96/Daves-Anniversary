@@ -65,18 +65,13 @@ class InitLevelStage(abc.ABC):
         self.particle_manager = ParticleManager(self.camera)
 
         self.checkpoints = {
-            obj.checkpoint_id: Checkpoint(pygame.Rect(obj.x, obj.y, obj.width, obj.height), obj.checkpoint_id, self.particle_manager)
+            Checkpoint(pygame.Rect(obj.x, obj.y, obj.width, obj.height), self.particle_manager)
             for obj in self.tilemap.tilemap.get_layer_by_name("checkpoints")
         }
 
-        if self.latest_checkpoint is None:
-            player_pos = (0, 0)
-        else:
-            player_pos = self.checkpoints[self.latest_checkpoint].rect.midbottom
-
         self.player = Player(
             self.settings[self.current_dimension.value],
-            player_pos,
+            self.latest_checkpoint,
             self.assets["dave_walk"],
             self.camera,
             self.particle_manager,
@@ -105,7 +100,7 @@ class RenderCheckpointStage(RenderBackgroundStage):
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
 
-        for checkpoint in self.checkpoints.values():
+        for checkpoint in self.checkpoints:
             checkpoint.draw(screen)
 
 class RenderPortalStage(RenderCheckpointStage):
@@ -262,9 +257,9 @@ class CheckpointStage(EnemyStage):
     
     def update(self, event_info: EventInfo):
         super().update(event_info)
-        for checkpoint_id, checkpoint in self.checkpoints.items():
+        for checkpoint in self.checkpoints:
             if not checkpoint.text_spawned and checkpoint.rect.colliderect(self.player.rect):
-                self.latest_checkpoint = checkpoint_id
+                self.latest_checkpoint = checkpoint.rect.midbottom
             
             checkpoint.update(self.player.rect)
 
