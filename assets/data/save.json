@@ -1,4 +1,5 @@
 {
   "first_time": false,
-  "last_volume": 0.09
+  "last_volume": 0.09,
+  "latest_checkpoint": null
 }

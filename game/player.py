@@ -30,6 +30,7 @@ class Player(Entity):
     def __init__(
         self,
         settings: dict,
+        pos: tuple,
         walk_frames: typing.List[pygame.Surface],
         camera,
         particle_manager,
@@ -51,7 +52,7 @@ class Player(Entity):
         self.camera = camera
         self.particle_manager = particle_manager
 
-        self.rect = pygame.Rect((0, 0), self.SIZE)
+        self.rect = pygame.Rect(pos, self.SIZE)
         self.jump_exp = ExplosionManager("smoke-jump")
         self.is_jump = False
 
