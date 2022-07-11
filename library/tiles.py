@@ -34,7 +34,7 @@ class SpikeTile:
     def __init__(self, img: pygame.Surface, obj):
         width = int(obj.width)
         height = int(obj.height)
-        
+
         self.rect = pygame.Rect(int(obj.x), int(obj.y), width, height)
         self.surf = pygame.Surface((width, height))
         self.surf.set_colorkey("black")

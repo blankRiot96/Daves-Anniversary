@@ -25,10 +25,10 @@ from library.particles import ParticleManager, TextParticle
 from library.sfx import SFXManager
 from library.sprite.load import load_assets
 from library.tilemap import TileLayerMap
+from library.tiles import SpikeTile
 from library.transition import FadeTransition
 from library.ui.buttons import Button
 from library.ui.camera import Camera
-from library.tiles import SpikeTile
 
 logger = logging.getLogger()
 
@@ -155,12 +155,7 @@ class TileStage(RenderEnemyStage):
 
         for spike_obj in self.tilemap.tilemap.get_layer_by_name("spikes"):
             if spike_obj.name == "spike":
-                self.spikes.add(
-                    SpikeTile(
-                        self.assets["spike"],
-                        spike_obj
-                    )
-                )
+                self.spikes.add(SpikeTile(self.assets["spike"], spike_obj))
 
         self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
 
