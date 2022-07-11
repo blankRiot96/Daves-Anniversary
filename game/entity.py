@@ -13,7 +13,7 @@ from game.common import EventInfo
 
 
 class Entity(abc.ABC):
-    def __init__(self, settings: dict):
+    def __init__(self, settings: dict, max_hp=None):
         # apply enemy stats
         self.change_settings(settings)
 
@@ -29,6 +29,18 @@ class Entity(abc.ABC):
         self.vel = pygame.Vector2()
         self.touched_ground = True
         self.alive = True
+
+        if max_hp is not None:
+            self.max_hp = max_hp
+            self._hp = self.max_hp
+
+    @property
+    def hp(self):
+        return self._hp
+
+    @hp.setter
+    def hp(self, value):
+        self._hp = max(min(value, self.max_hp), 0)
 
     def change_settings(self, settings: dict):
         self.gravity_acc = settings["gravity"]

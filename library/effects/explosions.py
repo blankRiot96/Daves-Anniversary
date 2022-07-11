@@ -63,7 +63,7 @@ class Explosion:
 
     def draw(self, screen):
         for particle in self.particles:
-            particle.draw(screen)
+            particle.draw(screen=screen)
 
 
 class ExplosionManager:

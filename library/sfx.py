@@ -7,9 +7,10 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from game.common import SAVE_DATA
 
 import pygame
+
+from game.common import SAVE_DATA
 
 logger = logging.getLogger()
 

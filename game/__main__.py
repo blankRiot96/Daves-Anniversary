@@ -4,12 +4,12 @@ The source code is distributed under the MIT license.
 """
 
 import asyncio
-import logging
 import json
+import logging
 
 import pygame
 
-from game.common import HEIGHT, SAVE_DATA, WIDTH, DATA_DIR, AUDIO_DIR
+from game.common import AUDIO_DIR, DATA_DIR, HEIGHT, SAVE_DATA, WIDTH
 from game.states.enums import States
 from game.states.intro import Dialogue
 from game.states.levels import Level
@@ -76,7 +76,7 @@ class Game:
         """
         Handle dynamic switching of game states
         """
-        
+
         if self.game_state.next_state is not None:
             self._save()
             self.state = self.game_state.next_state
@@ -87,20 +87,18 @@ class Game:
                 self.game_state.switch_info
             )
 
-
     def _save(self) -> None:
         """
         Saves all game related config
         for future games.
-        """ 
+        """
         SAVE_DATA["first_time"] = False
         if self.state == States.LEVEL:
             SAVE_DATA["last_volume"] = self.game_state.sound_icon.slider.value / 100
             print(SAVE_DATA["last_volume"])
-        
+
         with open(DATA_DIR / "save.json", "w") as f:
             json.dump(SAVE_DATA, f, indent=2)
-
 
     async def _run(self):
         """

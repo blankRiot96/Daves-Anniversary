@@ -60,7 +60,7 @@ class HorizontalSlider:
         """This is to detect point-circle collision, not needed for doing rect collisions."""
         mx, my = pos
         dx, dy = abs(self.x - mx), abs(self.y - my)
-        if math.sqrt(dx**2 + dy**2) <= self.radius:
+        if math.sqrt(dx ** 2 + dy ** 2) <= self.radius:
             return True
         return False
 

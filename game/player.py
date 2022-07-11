@@ -11,6 +11,7 @@ from game.entity import Entity, EntityFacing, EntityStates
 from game.items.grapple import Grapple, Swing
 from game.utils import get_neighboring_tiles, pixel_to_tile
 from library.effects.explosions import ExplosionManager
+from library.ui.healthbar import PlayerHealthBar
 from library.utils.animation import Animation
 from library.utils.funcs import flip_images
 
@@ -33,11 +34,12 @@ class Player(Entity):
         camera,
         particle_manager,
     ):
-        super().__init__(settings)
+        super().__init__(settings, self.MAX_HP)
         # set player stats
         self.change_settings(settings)
 
         self.alive = True
+        self._hp = self.MAX_HP
         self.animations = {
             "walk_right": Animation(walk_frames, self.WALK_ANIM_SPEED),
             "walk_left": Animation(flip_images(walk_frames), self.WALK_ANIM_SPEED),
@@ -54,12 +56,11 @@ class Player(Entity):
         self.is_jump = False
 
         self.grapple = Grapple(self, self.camera, self.particle_manager, settings)
+        self.healthbar = PlayerHealthBar(self, self.particle_manager, (10, 10), 180, 15)
 
     def _config_grapple(self, settings):
         self.grapple.GRAPPLE_RANGE = settings["grapple_range"]
         self.grapple.GRAPPLE_SPEED = settings["grapple_speed"]
-
-        self.hp = self.MAX_HP
 
     def change_settings(self, settings: dict) -> None:
         self.speed = settings["player_speed"]
@@ -146,6 +147,10 @@ class Player(Entity):
         self.animation = self.animations[f"walk_{self.facing.name.lower()}"]
         self.animation.update(dt)
 
+        # HP Testing
+        # if random.random() < 0.05:
+        #     self.hp -= 5
+
     def handle_jump_exp(self, screen, camera):
         if self.is_jump:
             self.jump_exp.create_explosion(camera.apply(self.vec).topleft)
@@ -163,6 +168,7 @@ class Player(Entity):
         self.handle_jump_exp(screen, camera)
         # self.swing.draw(screen)
         self.grapple.draw(screen)
+        self.healthbar.draw(screen)
 
         animation = self.animations[f"walk_{self.facing.name.lower()}"]
 
