@@ -177,8 +177,13 @@ class AngularParticle:
         shape: str,
         size_reduction,
         glow: bool = False,
+        lifespan: int = 0,
+        screen=None,
         angle=None,
     ):
+        self.alive = True
+        self.screen = screen
+
         self.pos = pos
         self.color = color
         self.size = size
@@ -199,25 +204,43 @@ class AngularParticle:
         self.size_reduction = size_reduction
         self.glow = glow
 
-    def update(self, dt: float, speed_reduce=0):
+        self.lifespan = lifespan
+        self.current_lifespan = 0
+
+    def update(self, delta_time: float, speed_reduce=0):
         if speed_reduce:
             self.dx, self.dy = get_movement(self.angle, speed_reduce)
-        self.vec[0] += self.dx * dt
-        self.vec[1] += self.dy * dt
+        self.vec[0] += self.dx * delta_time
+        self.vec[1] += self.dy * delta_time
 
         # if self.size < 6:
         #     self.vec[1] += 120 * dt
 
-        self.size -= self.size_reduction * dt
+        if self.current_lifespan > self.lifespan or self.size < 0:
+            self.alive = False
+
+        self.size -= self.size_reduction * delta_time
         self.rect = pygame.Rect(self.vec, (self.size, self.size))
 
-    def draw(self, screen: pygame.Surface):
+    def draw(self, _=None, screen=None):
         if self.shape == "square":
-            pygame.draw.rect(screen, self.color, self.rect)
+            pygame.draw.rect(
+                self.screen if self.screen is not None else screen,
+                self.color,
+                self.rect,
+            )
         elif self.shape == "circle":
-            pygame.draw.circle(screen, self.color, self.rect.center, self.size)
+            pygame.draw.circle(
+                self.screen if self.screen is not None else screen,
+                self.color,
+                self.rect.center,
+                self.size,
+            )
 
         if self.glow and self.size > 0:
             surf = circle_surf(self.size * 2, (20, 20, 20))
             r = surf.get_rect(center=self.rect.center)
-            screen.blit(surf, r, special_flags=pygame.BLEND_RGB_ADD)
+            if self.screen is not None:
+                self.screen.blit(surf, r, special_flags=pygame.BLEND_RGB_ADD)
+            else:
+                screen.blit(surf, r, special_flags=pygame.BLEND_RGB_ADD)

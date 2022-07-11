@@ -7,12 +7,13 @@ from typing import Optional
 
 import pygame
 
+import library.utils
 from game.common import HEIGHT, WIDTH, EventInfo
 from game.states.enums import States
 from library.sfx import SFXManager
 from library.transition import FadeTransition
 from library.ui.buttons import Button
-import library.utils
+
 
 class InitMainMenuStage:
     def __init__(self, switch_info: dict) -> None:
@@ -21,9 +22,11 @@ class InitMainMenuStage:
         self._change_dim = False
         self._next_state = None
 
+
 class RenderBackgroundStage(InitMainMenuStage):
     def draw(self, screen):
         screen.fill((23, 9, 14))
+
 
 class UIStage(RenderBackgroundStage):
     """
@@ -35,22 +38,26 @@ class UIStage(RenderBackgroundStage):
 
         texts = ("start", "intro", "reset", "credits")
         button_pad_y = 20
-        self.buttons = tuple((
-            Button(
-                pos=(50, ((30 + button_pad_y) * index) + 50),
-                size=(120, 30),
-                colors={
-                    "static": (14, 13, 20),
-                    "hover": (25, 20, 32),
-                    "text": (85, 87, 91)
-                },
-                font_name=None,
-                text=text,
-                corner_radius=3
+        self.buttons = tuple(
+            (
+                Button(
+                    pos=(50, ((30 + button_pad_y) * index) + 50),
+                    size=(120, 30),
+                    colors={
+                        "static": (14, 13, 20),
+                        "hover": (25, 20, 32),
+                        "text": (85, 87, 91),
+                    },
+                    font_name=None,
+                    text=text,
+                    corner_radius=3,
+                )
+                for index, text in enumerate(texts)
             )
-        for index, text in enumerate(texts)))
-        self.font_surf = library.utils.font(size=50, name=None).render("Dave's Anniversary", True, (72, 74, 98))
-
+        )
+        self.font_surf = library.utils.font(size=50, name=None).render(
+            "Dave's Anniversary", True, (72, 74, 98)
+        )
 
     def update(self, event_info: EventInfo):
         """
@@ -70,7 +77,6 @@ class UIStage(RenderBackgroundStage):
                     self._change_dim = True
                     self._next_state = States.DIALOGUE
 
-
     def draw(self, screen: pygame.Surface):
         """
         Draw the Button state
@@ -81,8 +87,12 @@ class UIStage(RenderBackgroundStage):
         super().draw(screen)
         for button in self.buttons:
             button.draw(screen)
-        
-        screen.blit(self.font_surf, (200, screen.get_rect().centery - self.font_surf.get_height()))
+
+        screen.blit(
+            self.font_surf,
+            (200, screen.get_rect().centery - self.font_surf.get_height()),
+        )
+
 
 class TransitionStage(UIStage):
     """

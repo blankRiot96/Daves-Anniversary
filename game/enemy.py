@@ -14,8 +14,8 @@ from game.utils import (get_neighboring_tiles, pixel_to_tile,
 
 
 class Enemy(Entity):
-    def __init__(self, settings: dict, obj):
-        super().__init__(settings)
+    def __init__(self, settings: dict, obj, max_hp=None):
+        super().__init__(settings, max_hp)
 
         self.speed = obj.speed
         self.size = (int(obj.width), int(obj.height))

@@ -10,7 +10,7 @@ from typing import Optional
 import pygame
 
 from game.background import BackGroundEffect
-from game.common import (SAVE_DATA, HEIGHT, MAP_DIR, SETTINGS_DIR, WIDTH,
+from game.common import (HEIGHT, MAP_DIR, SAVE_DATA, SETTINGS_DIR, WIDTH,
                          EventInfo)
 from game.enemy import MovingWall
 from game.interactables.notes import Note
@@ -248,15 +248,15 @@ class NoteStage(EnemyStage):
 class PortalStage(NoteStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-        self.unlocked_dimensions = [Dimensions.PARALLEL_DIMENSION,
-        Dimensions.VOLCANIC_DIMENSION]
+        self.unlocked_dimensions = [
+            Dimensions.PARALLEL_DIMENSION,
+            Dimensions.VOLCANIC_DIMENSION,
+        ]
 
         for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
             if portal_obj.name == "portal":
                 self.portals.add(
-                    Portal(
-                        portal_obj, self.unlocked_dimensions, self.assets["portal"]
-                    )
+                    Portal(portal_obj, self.unlocked_dimensions, self.assets["portal"])
                 )
 
     def update(self, event_info: EventInfo):
@@ -289,11 +289,9 @@ class PortalStage(NoteStage):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_5:
                 for dimension in Dimensions:
                     if dimension not in self.unlocked_dimensions:
-                        self.unlocked_dimensions.append(
-                            dimension
-                        )
+                        self.unlocked_dimensions.append(dimension)
                         break
-                
+
                 for portal in self.portals:
                     portal.unlock_dimension(self.unlocked_dimensions)
 
@@ -313,7 +311,6 @@ class UIStage(CameraStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         self.buttons = ()
-
 
     def update(self, event_info: EventInfo):
         """
@@ -352,12 +349,14 @@ class SFXStage(UIStage):
         )
 
         self.sfx_manager.set_volume(SAVE_DATA["last_volume"] * 100)
-        self.sound_icon.slider.value = SAVE_DATA["last_volume"] * self.sound_icon.slider.max_value
+        self.sound_icon.slider.value = (
+            SAVE_DATA["last_volume"] * self.sound_icon.slider.max_value
+        )
 
     def update(self, event_info: EventInfo):
         super().update(event_info)
         self.sound_icon.update(event_info)
-    
+
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
         self.sound_icon.draw(screen)
