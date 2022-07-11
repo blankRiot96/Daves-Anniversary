@@ -31,13 +31,26 @@ class Tile:
 
 
 class SpikeTile:
-    def __init__(self, image: pygame.Surface, pos: tuple[int, int]):
-        self.image = image
-        self.rect = self.image.get_rect(topleft=pos)
+    def __init__(self, img: pygame.Surface, obj):
+        width = int(obj.width)
+        height = int(obj.height)
+        
+        self.rect = pygame.Rect(int(obj.x), int(obj.y), width, height)
+        self.surf = pygame.Surface((width, height))
+        self.surf.set_colorkey("black")
+
+        range_y = int(height / img.get_height())
+        range_x = int(width / img.get_width())
+        for y in range(range_y):
+            for x in range(range_x):
+                self.surf.blit(img, (x * img.get_width(), y * img.get_height()))
 
     def update(self, player):
         if player.rect.colliderect(self.rect):
             player.alive = False
+
+    def draw(self, screen: pygame.Surface, camera):
+        screen.blit(self.surf, camera.apply(self.rect))
 
 
 class AnimatedDecorationTile:

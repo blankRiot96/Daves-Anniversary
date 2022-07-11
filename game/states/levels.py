@@ -28,6 +28,7 @@ from library.tilemap import TileLayerMap
 from library.transition import FadeTransition
 from library.ui.buttons import Button
 from library.ui.camera import Camera
+from library.tiles import SpikeTile
 
 logger = logging.getLogger()
 
@@ -55,6 +56,7 @@ class InitLevelStage(abc.ABC):
         self.enemies = set()
         self.portals = set()
         self.notes = set()
+        self.spikes = set()
         self.particle_manager = ParticleManager(self.camera)
 
         self.player = Player(
@@ -151,6 +153,15 @@ class TileStage(RenderEnemyStage):
                     )
                 )
 
+        for spike_obj in self.tilemap.tilemap.get_layer_by_name("spikes"):
+            if spike_obj.name == "spike":
+                self.spikes.add(
+                    SpikeTile(
+                        self.assets["spike"],
+                        spike_obj
+                    )
+                )
+
         self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
 
     def draw(self, screen: pygame.Surface):
@@ -231,7 +242,21 @@ class EnemyStage(SpecialTileStage):
             enemy.update(event_info, self.tilemap, self.player)
 
 
-class NoteStage(EnemyStage):
+class SpikeStage(EnemyStage):
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+
+        for spike in self.spikes:
+            spike.update(self.player)
+
+    def draw(self, screen: pygame.Surface):
+        super().draw(screen)
+
+        for spike in self.spikes:
+            spike.draw(screen, self.camera)
+
+
+class NoteStage(SpikeStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         self.notes = {
