@@ -9,13 +9,22 @@
         "size_reduction": 0.2
     },
     "fire": {
-        "n_particles": 500,
-        "n_size": [3, 10],
-        "speed": [1.3, 3.5],
+        "n_particles": 50,
+        "n_size": [1, 5],
+        "speed": [0.3, 0.6],
         "shape": "circle",
-        "color": "orange",
-        "glow": false,
-        "size_reduction": 0.2
+        "color": [98, 41, 3],
+        "glow": true,
+        "size_reduction": 0.08
+    },
+    "turret": {
+        "n_particles": 50,
+        "n_size": [2, 6],
+        "speed": [0.4, 1.3],
+        "shape": "circle",
+        "color": "white",
+        "glow": true,
+        "size_reduction": 0.1
     },
     "smoke-jump": {
         "n_particles": 25,

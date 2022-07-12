@@ -61,7 +61,7 @@ class Explosion:
             if particle.size < 0:
                 self.particles.remove(particle)
 
-    def draw(self, screen):
+    def draw(self, screen, camera=(0, 0)):
         for particle in self.particles:
             particle.draw(screen=screen)
 
