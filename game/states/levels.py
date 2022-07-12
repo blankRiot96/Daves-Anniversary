@@ -41,7 +41,9 @@ class InitLevelStage(abc.ABC):
         """
 
         self.switch_info = switch_info
-        self.current_dimension = Dimensions(SAVE_DATA["latest_dimension"])  # First parallel dimension
+        self.current_dimension = Dimensions(
+            SAVE_DATA["latest_dimension"]
+        )  # First parallel dimension
         self.latest_checkpoint = SAVE_DATA["latest_checkpoint"]
 
         self.camera = Camera(WIDTH, HEIGHT)
@@ -67,7 +69,9 @@ class InitLevelStage(abc.ABC):
         self.particle_manager = ParticleManager(self.camera)
 
         self.checkpoints = {
-            Checkpoint(pygame.Rect(obj.x, obj.y, obj.width, obj.height), self.particle_manager)
+            Checkpoint(
+                pygame.Rect(obj.x, obj.y, obj.width, obj.height), self.particle_manager
+            )
             for obj in self.tilemap.tilemap.get_layer_by_name("checkpoints")
         }
 
@@ -181,7 +185,7 @@ class TileStage(RenderEnemyStage):
                     MovingPlatform(
                         self.settings[self.current_dimension.value],
                         enemy_obj,
-                        self.tilesets[self.current_dimension]
+                        self.tilesets[self.current_dimension],
                     )
                 )
 
@@ -284,14 +288,16 @@ class SpikeStage(EnemyStage):
 class CheckpointStage(SpikeStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-    
+
     def update(self, event_info: EventInfo):
         super().update(event_info)
         for checkpoint in self.checkpoints:
-            if not checkpoint.text_spawned and checkpoint.rect.colliderect(self.player.rect):
+            if not checkpoint.text_spawned and checkpoint.rect.colliderect(
+                self.player.rect
+            ):
                 self.latest_checkpoint = checkpoint.rect.midbottom
                 SAVE_DATA["latest_checkpoint"] = self.latest_checkpoint
-            
+
             checkpoint.update(self.player.rect)
 
 
@@ -348,7 +354,9 @@ class PortalStage(NoteStage):
                     enemy.change_settings(self.settings[self.current_dimension.value])
 
                     if enemy.name == "moving_platform":
-                        enemy.surf = enemy.assemble_img(self.tilesets[self.current_dimension])
+                        enemy.surf = enemy.assemble_img(
+                            self.tilesets[self.current_dimension]
+                        )
 
             portal.update(self.player, event_info)
 
@@ -458,16 +466,16 @@ class PauseStage(ExplosionStage):
         button_pad_y = 20
         self.pause_buttons = [
             Button(
-                    pos=(WIDTH - 140, HEIGHT - (((30 + button_pad_y) * index) + 50)),
-                    size=(120, 30),
-                    colors={
-                        "static": (51, 57, 65),
-                        "hover": (74, 84, 98),
-                        "text": (179, 185, 209),
-                    },
-                    font_name=None,
-                    text=text,
-                    corner_radius=3,
+                pos=(WIDTH - 140, HEIGHT - (((30 + button_pad_y) * index) + 50)),
+                size=(120, 30),
+                colors={
+                    "static": (51, 57, 65),
+                    "hover": (74, 84, 98),
+                    "text": (179, 185, 209),
+                },
+                font_name=None,
+                text=text,
+                corner_radius=3,
             )
             for index, text in enumerate(button_texts)
         ]
@@ -481,7 +489,7 @@ class PauseStage(ExplosionStage):
         if not self.paused:
             super().update(event_info)
             return
-    
+
         for button in self.pause_buttons:
             button.update(event_info["mouse_pos"], event_info["mouse_press"])
 
@@ -496,7 +504,7 @@ class PauseStage(ExplosionStage):
 
         if not self.paused:
             return
-        
+
         for button in self.pause_buttons:
             button.draw(screen)
 
