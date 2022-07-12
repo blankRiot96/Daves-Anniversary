@@ -122,3 +122,11 @@ class MovingWall(Enemy):
         # )
         screen.blit(self.surf, camera.apply(self.rect).topleft)
         # pygame.draw.rect(screen, (42, 45, 55), (0, 0, self.rect.width, self.rect.height))
+
+
+class MovingPlatform(Enemy):
+    def __init__(self, settings: dict, obj):
+        super().__init__(settings, obj)
+
+        self.wander_point_a = tile_to_pixel(string_pos_to_tuple(obj.wander_point_a))
+        self.wander_point_b = tile_to_pixel(string_pos_to_tuple(obj.wander_point_b))

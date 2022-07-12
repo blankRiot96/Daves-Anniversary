@@ -220,7 +220,6 @@ class PlayerStage(TileStage):
         # Temporary checking here
         if self.player.y > 2000:
             self.player.alive = False
-            SAVE_DATA["latest_checkpoint"] = self.latest_checkpoint
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
@@ -282,6 +281,7 @@ class CheckpointStage(SpikeStage):
         for checkpoint in self.checkpoints:
             if not checkpoint.text_spawned and checkpoint.rect.colliderect(self.player.rect):
                 self.latest_checkpoint = checkpoint.rect.midbottom
+                SAVE_DATA["latest_checkpoint"] = self.latest_checkpoint
             
             checkpoint.update(self.player.rect)
 
