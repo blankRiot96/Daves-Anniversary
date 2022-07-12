@@ -95,7 +95,7 @@ class Game:
         SAVE_DATA["first_time"] = False
         if self.state == States.LEVEL:
             SAVE_DATA["last_volume"] = self.game_state.sound_icon.slider.value / 100
-            print(SAVE_DATA["last_volume"])
+            print(SAVE_DATA)
 
         with open(DATA_DIR / "save.json", "w") as f:
             json.dump(SAVE_DATA, f, indent=2)

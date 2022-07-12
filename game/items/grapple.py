@@ -4,17 +4,18 @@ The source code is distributed under the MIT license.
 """
 
 import math
+import random
 
 import pygame
 
 from game.common import TILE_WIDTH
 from game.utils import get_neighboring_tiles, load_font, pixel_to_tile
-from library.particles import TextParticle
+from library.particles import AngularParticle, TextParticle
 
 
 class Grapple:
-    GRAPPLE_RANGE = 12
-    GRAPPLE_SPEED = 12
+    GRAPPLE_RANGE = 14
+    GRAPPLE_SPEED = 15
 
     def __init__(self, player, camera, particle_manager, settings):
         self.GRAPPLE_RANGE = settings["grapple_range"]
@@ -100,6 +101,27 @@ class Grapple:
 
                 if self.grapple_startpoint.distance_to(self.grapple_endpoint) > 20:
                     self._grapple_pull(event_info)
+
+                    appl_player = self.camera.apply(self.player.vec)
+                    appl_player_vec = pygame.Vector2(appl_player.x, appl_player.y)
+
+                    if random.random() < 0.2:
+                        self.particle_manager.add(
+                            AngularParticle(
+                                pos=appl_player_vec,
+                                color=(255, 255, 255),
+                                size=3,
+                                speed=0.45,
+                                shape="circle",
+                                size_reduction=0.03,
+                                glow=True,
+                                lifespan=60,
+                                screen=self.screen,
+                                angle=random.uniform(
+                                    math.radians(180), math.radians(0)
+                                ),
+                            )
+                        )
                 else:
                     self.player.vel.x, self.player.vel.y = 0, 0
                 break

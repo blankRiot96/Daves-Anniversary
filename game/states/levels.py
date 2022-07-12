@@ -13,6 +13,7 @@ from game.background import BackGroundEffect
 from game.common import (HEIGHT, MAP_DIR, SAVE_DATA, SETTINGS_DIR, WIDTH,
                          EventInfo)
 from game.enemy import MovingWall
+from game.interactables.checkpoint import Checkpoint
 from game.interactables.notes import Note
 from game.interactables.portal import Portal
 from game.interactables.sound_icon import SoundIcon
@@ -35,15 +36,20 @@ logger = logging.getLogger()
 
 class InitLevelStage(abc.ABC):
     def __init__(self, switch_info: dict) -> None:
-        self.switch_info = switch_info
-        self.current_dimension = Dimensions.PARALLEL_DIMENSION
         """
         Initialize some attributes
         """
+
+        self.switch_info = switch_info
+        self.current_dimension = Dimensions(SAVE_DATA["latest_dimension"])  # First parallel dimension
+        self.latest_checkpoint = SAVE_DATA["latest_checkpoint"]
+
         self.camera = Camera(WIDTH, HEIGHT)
         self.sfx_manager = SFXManager("level")
         self.assets = load_assets("level")
         self.event_info = {"dt": 0}
+
+        self.tilemap = TileLayerMap(MAP_DIR / "dimension_one.tmx")
 
         self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
         self.next_state: Optional[States] = None
@@ -52,6 +58,7 @@ class InitLevelStage(abc.ABC):
             enm.value: load_settings(SETTINGS_DIR / f"{enm.value}.json")
             for enm in Dimensions
         }
+
         self.dimensions_traveled = {self.current_dimension}
         self.enemies = set()
         self.portals = set()
@@ -59,8 +66,14 @@ class InitLevelStage(abc.ABC):
         self.spikes = set()
         self.particle_manager = ParticleManager(self.camera)
 
+        self.checkpoints = {
+            Checkpoint(pygame.Rect(obj.x, obj.y, obj.width, obj.height), self.particle_manager)
+            for obj in self.tilemap.tilemap.get_layer_by_name("checkpoints")
+        }
+
         self.player = Player(
             self.settings[self.current_dimension.value],
+            self.latest_checkpoint,
             self.assets["dave_walk"],
             self.camera,
             self.particle_manager,
@@ -85,7 +98,14 @@ class RenderBackgroundStage(InitLevelStage):
         self.background_manager.draw(screen, self.camera, self.current_dimension)
 
 
-class RenderPortalStage(RenderBackgroundStage):
+class RenderCheckpointStage(RenderBackgroundStage):
+    def draw(self, screen: pygame.Surface):
+        super().draw(screen)
+
+        for checkpoint in self.checkpoints:
+            checkpoint.draw(screen)
+
+class RenderPortalStage(RenderCheckpointStage):
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
 
@@ -138,10 +158,11 @@ class TileStage(RenderEnemyStage):
 
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-        # self.tilemap = TileLayerMap(MAP_DIR / f"{self.current_dimension.value}.tmx")
-        self.tilemap = TileLayerMap(MAP_DIR / "dimension_one.tmx")
+        # self.tilemap = TileLayerMap(MAP_DIR / f"{self.current_dimension.value}.tmx"
 
-        self.map_surf = self.tilemap.make_map()
+        self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
+
+        self.map_surf = self.tilemap.make_map(self.tilesets[self.current_dimension])
 
         for enemy_obj in self.tilemap.tilemap.get_layer_by_name("enemies"):
             if enemy_obj.name == "moving_wall":
@@ -199,6 +220,7 @@ class PlayerStage(TileStage):
         # Temporary checking here
         if self.player.y > 2000:
             self.player.alive = False
+            SAVE_DATA["latest_checkpoint"] = self.latest_checkpoint
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
@@ -251,7 +273,20 @@ class SpikeStage(EnemyStage):
             spike.draw(screen, self.camera)
 
 
-class NoteStage(SpikeStage):
+class CheckpointStage(SpikeStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+    
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+        for checkpoint in self.checkpoints:
+            if not checkpoint.text_spawned and checkpoint.rect.colliderect(self.player.rect):
+                self.latest_checkpoint = checkpoint.rect.midbottom
+            
+            checkpoint.update(self.player.rect)
+
+
+class NoteStage(CheckpointStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         self.notes = {
@@ -287,6 +322,7 @@ class PortalStage(NoteStage):
             # we have to reset portal's dimension to the current one
             if not portal.dimension_change:
                 portal.current_dimension = self.current_dimension
+                SAVE_DATA["latest_dimension"] = self.current_dimension.value
             # otherwise (if we're switching dimension)
             else:
                 logger.info(f"Changed dimension to: {portal.current_dimension}")
