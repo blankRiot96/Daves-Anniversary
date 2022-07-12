@@ -4,6 +4,7 @@ The source code is distributed under the MIT license.
 """
 
 import abc
+from asyncio import events
 import logging
 from typing import Optional
 
@@ -17,8 +18,8 @@ from game.interactables.checkpoint import Checkpoint
 from game.interactables.notes import Note
 from game.interactables.portal import Portal
 from game.interactables.sound_icon import SoundIcon
-from game.items.grapple import Grapple
 from game.player import Player
+from game.shooter import Shooter
 from game.states.enums import Dimensions, States
 from game.utils import load_font, load_settings
 from library.effects import ExplosionManager
@@ -78,6 +79,8 @@ class InitLevelStage(abc.ABC):
             self.camera,
             self.particle_manager,
         )
+        self.explosion_manager = ExplosionManager("fire")
+        self.turret_explosioner = ExplosionManager("turret")
 
     def update(*args, **kwargs):
         pass
@@ -151,7 +154,39 @@ class RenderEnemyStage(RenderNoteStage):
             enemy.draw(self.event_info["dt"], screen, self.camera)
 
 
-class TileStage(RenderEnemyStage):
+class ShooterStage(RenderEnemyStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        self.shooters = {
+            Shooter(self.assets["shooter"], obj)
+            for obj in self.tilemap.tilemap.get_layer_by_name("shooters")
+        }
+
+    def update(self) -> None:
+        super().update()
+
+        for shooter in set(self.shooters):
+            dm, vec, pos = shooter.update(self.player, self.event_info["dt"])
+            if vec:
+                self.explosion_manager.create_explosion(self.camera.apply(vec).topleft)
+            
+            if dm:
+                self.player.hp -= dm
+
+            if pos:
+                self.turret_explosioner.create_explosion(self.camera.apply(pos).topleft)
+
+            if not shooter.alive:
+                self.shooters.remove(shooter)
+
+    def draw(self, screen: pygame.Surface) -> None:
+        super().draw(screen)
+
+        for shooter in self.shooters:
+            shooter.draw(screen, self.camera)
+
+
+class TileStage(ShooterStage):
     """
     Handles tilemap rendering
     """
@@ -189,20 +224,6 @@ class TileStage(RenderEnemyStage):
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
         screen.blit(self.map_surf, self.camera.apply((0, 0)))
-
-
-"""class ItemStage(TileStage):
-    def __init__(self, switch_info: dict) -> None:
-        super().__init__(switch_info)
-
-        self.grapple = Grapple(self.player, self.camera)
-    
-    def draw(self, screen):
-        super().draw(screen)
-        self.grapple.draw(screen)
-    
-    def update(self, event_info: EventInfo):
-        self.grapple.update(event_info, self.tilemap)"""
 
 
 class PlayerStage(TileStage):
@@ -428,13 +449,11 @@ class SFXStage(UIStage):
 
 
 class ExplosionStage(SFXStage):
-    def __init__(self, switch_info: dict) -> None:
-        super().__init__(switch_info)
-        self.explosion_manager = ExplosionManager("fire")
 
     def update(self, event_info: EventInfo) -> None:
         super().update(event_info)
         self.explosion_manager.update(event_info["dt"])
+        self.turret_explosioner.update(event_info["dt"])
 
         # for event in event_info["events"]:
         #     if event.type == pygame.MOUSEBUTTONDOWN:
@@ -442,6 +461,7 @@ class ExplosionStage(SFXStage):
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
         self.explosion_manager.draw(screen)
+        self.turret_explosioner.draw(screen)
 
 
 class TransitionStage(ExplosionStage):
