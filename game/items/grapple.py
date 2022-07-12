@@ -14,8 +14,8 @@ from library.particles import AngularParticle, TextParticle
 
 
 class Grapple:
-    GRAPPLE_RANGE = 14
-    GRAPPLE_SPEED = 15
+    GRAPPLE_RANGE = 15
+    GRAPPLE_SPEED = 20
 
     def __init__(self, player, camera, particle_manager, settings):
         self.GRAPPLE_RANGE = settings["grapple_range"]
