@@ -39,7 +39,7 @@ class _Line:
         self.end_pos = pygame.Vector2((0, 0))
         self.alive = True
         self.distance_travelled = 0
-        self.diagonal_distance = math.sqrt((WIDTH ** 2) + (HEIGHT ** 2))
+        self.diagonal_distance = math.sqrt((WIDTH**2) + (HEIGHT**2))
 
         # Incrementing counter for every time
         # a line is instanced

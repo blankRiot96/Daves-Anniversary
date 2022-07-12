@@ -109,7 +109,7 @@ class Grapple:
                         self.particle_manager.add(
                             AngularParticle(
                                 pos=appl_player_vec,
-                                color=(255, 255, 255),
+                                color=(254, 243, 192),
                                 size=3,
                                 speed=0.45,
                                 shape="circle",
