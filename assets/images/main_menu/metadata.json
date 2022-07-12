@@ -1,0 +1,12 @@
+{
+	"bg_1.png": {
+		"sprite_sheet": null,
+		"convert_alpha": true,
+		"states": ["main_menu"]
+	},
+	"bg_2.png": {
+		"sprite_sheet": null,
+		"convert_alpha": true,
+		"states": ["main_menu"]
+	}
+}

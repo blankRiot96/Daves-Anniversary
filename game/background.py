@@ -6,6 +6,7 @@ The source code is distributed under the MIT license.
 import logging
 import math
 import random
+from typing import List, Tuple
 
 import pygame
 
@@ -175,3 +176,48 @@ class BackGroundEffect:
 
         for line in self.lines:
             line.draw(screen)
+
+
+class ParallaxBackground:
+    """
+    Parralax background class
+    """
+
+    def __init__(
+        self,
+        #             layer           speed
+        layers: List[Tuple[pygame.Surface, float]],
+    ):
+
+        self.layers = layers
+
+    def draw_layer(
+        self, screen: pygame.Surface, layer: pygame.Surface, scroll: Tuple, speed: float
+    ):
+        """
+        Draws a layer of the background on the screen
+
+        Parameters:
+                layer: Image of the layer
+                scroll: World scroll
+                speed: Moving speed of the layer
+        """
+        width = screen.get_width()
+        x = -scroll[0] * speed
+
+        x %= width
+
+        if abs(x) <= width:
+            screen.blit(layer, (x, 0))
+        if x != 0:
+            screen.blit(layer, (x - width, 0))
+
+    def draw(self, screen: pygame.Surface, world_scroll: Tuple):
+        """
+        Updates and draws all layers of the background
+
+        Parameters:
+                world_scroll: World camera scroll
+        """
+        for layer, speed in self.layers:
+            self.draw_layer(screen, layer, world_scroll, speed)

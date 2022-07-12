@@ -87,7 +87,8 @@ class Player(Entity):
             self.state = EntityStates.WALK
             self.facing = EntityFacing.RIGHT
         if keys[pygame.K_a]:
-            self.vel.x = -self.speed * dt
+            if self.vec.x > 0:
+                self.vel.x = -self.speed * dt
             self.state = EntityStates.WALK
             self.facing = EntityFacing.LEFT
 
