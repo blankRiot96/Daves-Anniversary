@@ -12,7 +12,7 @@ import pygame
 from game.background import BackGroundEffect
 from game.common import (HEIGHT, MAP_DIR, SAVE_DATA, SETTINGS_DIR, WIDTH,
                          EventInfo)
-from game.enemy import MovingWall
+from game.enemy import MovingPlatform, MovingWall
 from game.interactables.checkpoint import Checkpoint
 from game.interactables.notes import Note
 from game.interactables.portal import Portal
@@ -173,12 +173,18 @@ class TileStage(RenderEnemyStage):
                         self.assets,
                     )
                 )
+            elif enemy_obj.name == "moving_platform":
+                self.enemies.add(
+                    MovingPlatform(
+                        self.settings[self.current_dimension.value],
+                        enemy_obj,
+                        self.tilesets[self.current_dimension]
+                    )
+                )
 
         for spike_obj in self.tilemap.tilemap.get_layer_by_name("spikes"):
             if spike_obj.name == "spike":
                 self.spikes.add(SpikeTile(self.assets["spike"], spike_obj))
-
-        self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
@@ -337,6 +343,9 @@ class PortalStage(NoteStage):
                 # change enemy settings
                 for enemy in self.enemies:
                     enemy.change_settings(self.settings[self.current_dimension.value])
+
+                    if enemy.name == "moving_platform":
+                        enemy.surf = enemy.assemble_img(self.tilesets[self.current_dimension])
 
             portal.update(self.player, event_info)
 

@@ -20,6 +20,7 @@ class Enemy(Entity):
         self.speed = obj.speed
         self.size = (int(obj.width), int(obj.height))
         self.rect = pygame.Rect((obj.x, obj.y), self.size)
+        self.name = obj.name
 
     def handle_collision(
         self, neighboring_tiles: typing.List[typing.Any], player
@@ -125,8 +126,81 @@ class MovingWall(Enemy):
 
 
 class MovingPlatform(Enemy):
-    def __init__(self, settings: dict, obj):
+    def __init__(self, settings: dict, obj, tileset):
         super().__init__(settings, obj)
 
         self.wander_point_a = tile_to_pixel(string_pos_to_tuple(obj.wander_point_a))
         self.wander_point_b = tile_to_pixel(string_pos_to_tuple(obj.wander_point_b))
+
+        self.last_turned = 0
+
+        self.placeholder_surf = pygame.Surface(self.size)
+        self.placeholder_surf.fill((128, 128, 128))
+
+        self.surf = self.assemble_img(tileset)
+    
+    def assemble_img(self, tileset):
+        temp_surf = pygame.Surface(self.size, pygame.SRCALPHA)
+
+        tile_width, tile_height = self.size[0] // TILE_WIDTH, self.size[1] // TILE_HEIGHT
+        corners = {
+            (0, 0): 0,
+            (tile_width - 1, 0): 2,
+            (0, tile_height - 1): 8,
+            (tile_width - 1, tile_height - 1): 10
+        }
+
+        for y in range(tile_height):
+            for x in range(tile_width):
+                if (x, y) in corners:
+                    tile_id = corners[(x, y)]
+                elif x == 0:
+                    tile_id = 4
+                elif y == 0:
+                    tile_id = 1
+                elif x == tile_width - 1:
+                    tile_id = 6
+                elif y == tile_height - 1:
+                    tile_id = 9
+                else:
+                    tile_id = 5
+
+                temp_surf.blit(tileset[tile_id], (x * TILE_WIDTH, y * TILE_HEIGHT))
+        
+        return temp_surf
+    
+    def update(self, event_info: EventInfo, tilemap, player) -> None:
+        self.vel.x = 0
+
+        dt = event_info["dt"]
+
+        self.vel.x = self.speed * dt * self.facing.value
+
+        player_rect = player.rect.copy()
+        player_rect.y += 1
+        if player_rect.colliderect(self.rect):
+            player.rect.x += round(self.vel.x)
+
+        self.rect.x += round(self.vel.x)
+
+        # Update position attributes to rect.topleft
+        self.vec.x, self.vec.y = self.rect.topleft
+        self.tile_vec = pixel_to_tile(self.vec)
+
+        if self.facing == EntityFacing.RIGHT:
+            check_x = self.rect.right
+            adj_wander_point_b = self.wander_point_b[0] + TILE_WIDTH
+        else:
+            check_x = self.rect.x
+            adj_wander_point_b = self.wander_point_b[0]
+
+        # Sometimes the platform get stuck, hence the last turned check
+        if (
+            not self.wander_point_a[0] < check_x < adj_wander_point_b
+            and pygame.time.get_ticks() - self.last_turned > 500
+        ):
+            self.facing = EntityFacing(-self.facing.value)
+            self.last_turned = pygame.time.get_ticks()
+
+    def draw(self, dt: float, screen: pygame.Surface, camera):
+        screen.blit(self.surf, camera.apply(self.rect).topleft)
