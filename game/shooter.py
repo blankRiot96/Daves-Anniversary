@@ -10,7 +10,7 @@ from library.effects.explosions import ExplosionManager
 
 class _Bullet:
     SIZE = 3
-    DAMAGE = 5
+    DAMAGE = 20
 
     def __init__(self, pos: Pos, angle: float, speed: float, max_dist: int) -> None:
         """
