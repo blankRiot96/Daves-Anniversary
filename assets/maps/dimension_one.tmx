@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="160" height="148" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="33">
+<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="160" height="148" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="34">
  <tileset firstgid="1" source="tilesets/parallel-dimension.tsx"/>
  <objectgroup id="3" name="portals">
   <object id="15" name="portal" x="554.667" y="63.3333" width="32" height="32"/>
@@ -79,7 +79,10 @@
    </properties>
   </object>
  </objectgroup>
- <layer id="1" name="tile-layer-1" width="160" height="148">
+ <objectgroup id="5" name="checkpoints">
+  <object id="33" name="checkpoint" x="800" y="0" width="16" height="144"/>
+ </objectgroup>
+ <layer id="1" name="terrain" width="160" height="148">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
