@@ -5,6 +5,7 @@ The source code is distributed under the MIT license.
 import typing
 
 import pygame
+import random
 
 from game.common import TILE_HEIGHT, TILE_WIDTH, EventInfo
 from game.entity import Entity, EntityFacing, EntityStates
@@ -38,6 +39,7 @@ class Player(Entity):
         super().__init__(settings, self.MAX_HP)
         # set player stats
         self.change_settings(settings)
+        self.hp = 100
 
         self.alive = True
         self._hp = self.MAX_HP
@@ -150,6 +152,8 @@ class Player(Entity):
         self.animation.update(dt)
 
         # HP Testing
+        if self.hp <= 0:
+            self.alive = False
         # if random.random() < 0.05:
         #     self.hp -= 5
 

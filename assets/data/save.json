@@ -1,9 +1,9 @@
 {
   "first_time": false,
-  "last_volume": 0.09,
+  "last_volume": 0.07,
   "latest_checkpoint": [
-    0,
-    0
+    1620,
+    607
   ],
-  "latest_dimension": "parallel_dimension"
+  "latest_dimension": "volcanic_dimension"
 }
