@@ -2,7 +2,8 @@
   "first_time": false,
   "last_volume": 0.09,
   "latest_checkpoint": [
-    0,
-    0
-  ]
+    808,
+    144
+  ],
+  "latest_dimension": "parallel_dimension"
 }
