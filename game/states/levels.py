@@ -4,7 +4,6 @@ The source code is distributed under the MIT license.
 """
 
 import abc
-from asyncio import events
 import logging
 from typing import Optional
 
@@ -66,6 +65,7 @@ class InitLevelStage(abc.ABC):
         self.notes = set()
         self.spikes = set()
         self.particle_manager = ParticleManager(self.camera)
+        self.paused = False
 
         self.checkpoints = {
             Checkpoint(pygame.Rect(obj.x, obj.y, obj.width, obj.height), self.particle_manager)
@@ -372,14 +372,16 @@ class PortalStage(NoteStage):
 
         # Unlocking dimensions
         for event in event_info["events"]:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_5:
-                for dimension in Dimensions:
-                    if dimension not in self.unlocked_dimensions:
-                        self.unlocked_dimensions.append(dimension)
-                        break
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_5:
+                    for dimension in Dimensions:
+                        if dimension not in self.unlocked_dimensions:
+                            self.unlocked_dimensions.append(dimension)
+                            break
 
-                for portal in self.portals:
-                    portal.unlock_dimension(self.unlocked_dimensions)
+                    for portal in self.portals:
+                        portal.unlock_dimension(self.unlocked_dimensions)
+            
 
 
 class CameraStage(PortalStage):
@@ -464,7 +466,33 @@ class ExplosionStage(SFXStage):
         self.turret_explosioner.draw(screen)
 
 
-class TransitionStage(ExplosionStage):
+class PauseStage(ExplosionStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        self.opac_surf = pygame.Surface((WIDTH, HEIGHT))
+        self.opac_surf.set_alpha(155)
+        self.text_surf = load_font(10).render("Paused", True, "white")
+
+    def update(self, event_info):
+        if not self.paused:
+            super().update(event_info)
+    
+        for event in event_info["events"]:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_t:
+                    self.paused = not self.paused 
+                
+
+    def draw(self, screen):
+        super().draw(screen)
+
+        if not self.paused:
+            return
+        screen.blit(self.opac_surf, (0, 0))
+        screen.blit(self.text_surf, (50, 50))
+
+
+class TransitionStage(PauseStage):
     """
     Handles game state transitions
     """
