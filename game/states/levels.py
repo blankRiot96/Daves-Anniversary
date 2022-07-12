@@ -40,7 +40,7 @@ class InitLevelStage(abc.ABC):
         """
 
         self.switch_info = switch_info
-        self.current_dimension = Dimensions.PARALLEL_DIMENSION
+        self.current_dimension = Dimensions(SAVE_DATA["latest_dimension"])  # First parallel dimension
         self.latest_checkpoint = SAVE_DATA["latest_checkpoint"]
 
         self.camera = Camera(WIDTH, HEIGHT)
@@ -158,7 +158,9 @@ class TileStage(RenderEnemyStage):
         super().__init__(switch_info)
         # self.tilemap = TileLayerMap(MAP_DIR / f"{self.current_dimension.value}.tmx"
 
-        self.map_surf = self.tilemap.make_map()
+        self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
+
+        self.map_surf = self.tilemap.make_map(self.tilesets[self.current_dimension])
 
         for enemy_obj in self.tilemap.tilemap.get_layer_by_name("enemies"):
             if enemy_obj.name == "moving_wall":
@@ -169,8 +171,6 @@ class TileStage(RenderEnemyStage):
                         self.assets,
                     )
                 )
-
-        self.tilesets = {enm: self.assets[enm.value] for enm in Dimensions}
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
@@ -300,6 +300,7 @@ class PortalStage(NoteStage):
             # we have to reset portal's dimension to the current one
             if not portal.dimension_change:
                 portal.current_dimension = self.current_dimension
+                SAVE_DATA["latest_dimension"] = self.current_dimension.value
             # otherwise (if we're switching dimension)
             else:
                 logger.info(f"Changed dimension to: {portal.current_dimension}")
