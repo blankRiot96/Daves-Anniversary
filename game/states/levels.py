@@ -41,7 +41,9 @@ class InitLevelStage(abc.ABC):
         """
 
         self.switch_info = switch_info
-        self.current_dimension = Dimensions(SAVE_DATA["latest_dimension"])  # First parallel dimension
+        self.current_dimension = Dimensions(
+            SAVE_DATA["latest_dimension"]
+        )  # First parallel dimension
         self.latest_checkpoint = SAVE_DATA["latest_checkpoint"]
 
         self.camera = Camera(WIDTH, HEIGHT)
@@ -68,7 +70,9 @@ class InitLevelStage(abc.ABC):
         self.paused = False
 
         self.checkpoints = {
-            Checkpoint(pygame.Rect(obj.x, obj.y, obj.width, obj.height), self.particle_manager)
+            Checkpoint(
+                pygame.Rect(obj.x, obj.y, obj.width, obj.height), self.particle_manager
+            )
             for obj in self.tilemap.tilemap.get_layer_by_name("checkpoints")
         }
 
@@ -81,6 +85,8 @@ class InitLevelStage(abc.ABC):
         )
         self.explosion_manager = ExplosionManager("fire")
         self.turret_explosioner = ExplosionManager("turret")
+
+        self.paused = False
 
     def update(*args, **kwargs):
         pass
@@ -107,6 +113,7 @@ class RenderCheckpointStage(RenderBackgroundStage):
 
         for checkpoint in self.checkpoints:
             checkpoint.draw(screen)
+
 
 class RenderPortalStage(RenderCheckpointStage):
     def draw(self, screen: pygame.Surface):
@@ -213,7 +220,7 @@ class TileStage(ShooterStage):
                     MovingPlatform(
                         self.settings[self.current_dimension.value],
                         enemy_obj,
-                        self.tilesets[self.current_dimension]
+                        self.tilesets[self.current_dimension],
                     )
                 )
 
@@ -302,14 +309,16 @@ class SpikeStage(EnemyStage):
 class CheckpointStage(SpikeStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-    
+
     def update(self, event_info: EventInfo):
         super().update(event_info)
         for checkpoint in self.checkpoints:
-            if not checkpoint.text_spawned and checkpoint.rect.colliderect(self.player.rect):
+            if not checkpoint.text_spawned and checkpoint.rect.colliderect(
+                self.player.rect
+            ):
                 self.latest_checkpoint = checkpoint.rect.midbottom
                 SAVE_DATA["latest_checkpoint"] = self.latest_checkpoint
-            
+
             checkpoint.update(self.player.rect)
 
 
@@ -366,7 +375,9 @@ class PortalStage(NoteStage):
                     enemy.change_settings(self.settings[self.current_dimension.value])
 
                     if enemy.name == "moving_platform":
-                        enemy.surf = enemy.assemble_img(self.tilesets[self.current_dimension])
+                        enemy.surf = enemy.assemble_img(
+                            self.tilesets[self.current_dimension]
+                        )
 
             portal.update(self.player, event_info)
 
@@ -469,27 +480,57 @@ class ExplosionStage(SFXStage):
 class PauseStage(ExplosionStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-        self.opac_surf = pygame.Surface((WIDTH, HEIGHT))
-        self.opac_surf.set_alpha(155)
-        self.text_surf = load_font(10).render("Paused", True, "white")
 
-    def update(self, event_info):
-        if not self.paused:
-            super().update(event_info)
-    
+        self.bg_darkener = pygame.Surface((WIDTH, HEIGHT))
+        self.bg_darkener.set_alpha(150)
+
+        button_texts = ("main menu", "continue")
+        button_pad_y = 20
+        self.pause_buttons = [
+            Button(
+                pos=(WIDTH - 140, HEIGHT - (((30 + button_pad_y) * index) + 50)),
+                size=(120, 30),
+                colors={
+                    "static": (51, 57, 65),
+                    "hover": (74, 84, 98),
+                    "text": (179, 185, 209),
+                },
+                font_name=None,
+                text=text,
+                corner_radius=3,
+            )
+            for index, text in enumerate(button_texts)
+        ]
+
+    def update(self, event_info: EventInfo):
         for event in event_info["events"]:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_t:
-                    self.paused = not self.paused 
-                
+                if event.key == pygame.K_ESCAPE:
+                    self.paused = not self.paused
 
-    def draw(self, screen):
+        if not self.paused:
+            super().update(event_info)
+            return
+
+        for button in self.pause_buttons:
+            button.update(event_info["mouse_pos"], event_info["mouse_press"])
+
+            if button.clicked:
+                if button.text == "continue":
+                    self.paused = False
+                elif button.text == "main menu":
+                    self.next_state = States.MAIN_MENU
+
+    def draw(self, screen: pygame.Surface):
         super().draw(screen)
 
         if not self.paused:
             return
-        screen.blit(self.opac_surf, (0, 0))
-        screen.blit(self.text_surf, (50, 50))
+
+        for button in self.pause_buttons:
+            button.draw(screen)
+
+        screen.blit(self.bg_darkener, (0, 0))
 
 
 class TransitionStage(PauseStage):

@@ -85,7 +85,8 @@ class Player(Entity):
         keys = event_info["key_press"]
         self.state = EntityStates.IDLE
         if keys[pygame.K_d]:
-            self.vel.x = self.speed * dt
+            if self.vec.x < 2544:
+                self.vel.x = self.speed * dt
             self.state = EntityStates.WALK
             self.facing = EntityFacing.RIGHT
         if keys[pygame.K_a]:

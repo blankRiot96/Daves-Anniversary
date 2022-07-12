@@ -138,16 +138,19 @@ class MovingPlatform(Enemy):
         self.placeholder_surf.fill((128, 128, 128))
 
         self.surf = self.assemble_img(tileset)
-    
+
     def assemble_img(self, tileset):
         temp_surf = pygame.Surface(self.size, pygame.SRCALPHA)
 
-        tile_width, tile_height = self.size[0] // TILE_WIDTH, self.size[1] // TILE_HEIGHT
+        tile_width, tile_height = (
+            self.size[0] // TILE_WIDTH,
+            self.size[1] // TILE_HEIGHT,
+        )
         corners = {
             (0, 0): 0,
             (tile_width - 1, 0): 2,
             (0, tile_height - 1): 8,
-            (tile_width - 1, tile_height - 1): 10
+            (tile_width - 1, tile_height - 1): 10,
         }
 
         for y in range(tile_height):
@@ -166,9 +169,9 @@ class MovingPlatform(Enemy):
                     tile_id = 5
 
                 temp_surf.blit(tileset[tile_id], (x * TILE_WIDTH, y * TILE_HEIGHT))
-        
+
         return temp_surf
-    
+
     def update(self, event_info: EventInfo, tilemap, player) -> None:
         self.vel.x = 0
 
