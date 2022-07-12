@@ -243,14 +243,14 @@
   <object id="39" name="spike" x="1571.42" y="368" width="491.167" height="16"/>
  </objectgroup>
  <objectgroup id="2" name="enemies">
-  <object id="34" name="moving_platform" x="1136" y="816" width="80" height="32">
+  <object id="34" name="moving_platform" x="1264" y="896" width="80" height="32">
    <properties>
     <property name="speed" type="float" value="0.94"/>
-    <property name="wander_point_a" value="(43, 4)"/>
-    <property name="wander_point_b" value="(60, 4)"/>
+    <property name="wander_point_a" value="(60, 56)"/>
+    <property name="wander_point_b" value="(94, 56)"/>
    </properties>
   </object>
-  <object id="40" name="moving_wall" x="940" y="58.5" width="16" height="80.6667">
+  <object id="40" name="moving_wall" x="944" y="64" width="16" height="80.6667">
    <properties>
     <property name="speed" type="float" value="0.94"/>
     <property name="wander_point_a" value="(43, 4)"/>
