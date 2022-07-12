@@ -79,6 +79,8 @@ class InitLevelStage(abc.ABC):
             self.particle_manager,
         )
 
+        self.paused = False
+
     def update(*args, **kwargs):
         pass
 
@@ -104,6 +106,7 @@ class RenderCheckpointStage(RenderBackgroundStage):
 
         for checkpoint in self.checkpoints:
             checkpoint.draw(screen)
+
 
 class RenderPortalStage(RenderCheckpointStage):
     def draw(self, screen: pygame.Surface):
@@ -444,7 +447,63 @@ class ExplosionStage(SFXStage):
         self.explosion_manager.draw(screen)
 
 
-class TransitionStage(ExplosionStage):
+class PauseStage(ExplosionStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+
+        self.bg_darkener = pygame.Surface((WIDTH, HEIGHT))
+        self.bg_darkener.set_alpha(150)
+
+        button_texts = ("main menu", "continue")
+        button_pad_y = 20
+        self.pause_buttons = [
+            Button(
+                    pos=(WIDTH - 140, HEIGHT - (((30 + button_pad_y) * index) + 50)),
+                    size=(120, 30),
+                    colors={
+                        "static": (51, 57, 65),
+                        "hover": (74, 84, 98),
+                        "text": (179, 185, 209),
+                    },
+                    font_name=None,
+                    text=text,
+                    corner_radius=3,
+            )
+            for index, text in enumerate(button_texts)
+        ]
+
+    def update(self, event_info: EventInfo):
+        for event in event_info["events"]:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.paused = not self.paused
+
+        if not self.paused:
+            super().update(event_info)
+            return
+    
+        for button in self.pause_buttons:
+            button.update(event_info["mouse_pos"], event_info["mouse_press"])
+
+            if button.clicked:
+                if button.text == "continue":
+                    self.paused = False
+                elif button.text == "main menu":
+                    self.next_state = States.MAIN_MENU
+
+    def draw(self, screen: pygame.Surface):
+        super().draw(screen)
+
+        if not self.paused:
+            return
+        
+        for button in self.pause_buttons:
+            button.draw(screen)
+
+        screen.blit(self.bg_darkener, (0, 0))
+
+
+class TransitionStage(PauseStage):
     """
     Handles game state transitions
     """
