@@ -11,12 +11,13 @@ from typing import Optional
 import pygame
 
 from game.background import BackGroundEffect
-from game.common import (HEIGHT, MAP_DIR, SAVE_DATA, SETTINGS_DIR, WIDTH,
+from game.common import (ASSETS_DIR, HEIGHT, MAP_DIR, SAVE_DATA, SETTINGS_DIR, WIDTH,
                          EventInfo)
 from game.enemy import MovingPlatform, MovingWall, Ungrappleable
 from game.interactables.checkpoint import Checkpoint
 from game.interactables.notes import Note
 from game.interactables.portal import Portal
+from game.interactables.ring import Ring
 from game.interactables.sound_icon import SoundIcon
 from game.player import Player
 from game.shooter import Shooter
@@ -83,6 +84,10 @@ class InitLevelStage(abc.ABC):
             )
             for obj in self.tilemap.tilemap.get_layer_by_name("checkpoints")
         }
+
+        self.ring = [Ring(pygame.image.load(ASSETS_DIR / "images/ring.png"), (obj.x, obj.y), self.particle_manager) for obj in self.tilemap.tilemap.get_layer_by_name("ring")][0]
+        self.ring.on_ground = not SAVE_DATA["has_ring"]
+
         self.num_extra_dims_unlocked = SAVE_DATA["num_extra_dims_unlocked"]
 
         for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
@@ -101,7 +106,10 @@ class InitLevelStage(abc.ABC):
             self.assets["dave_walk"],
             self.camera,
             self.particle_manager,
+            SAVE_DATA["has_ring"]
         )
+        self.player.ring_img = self.ring.non_interacting_img
+
         self.explosion_manager = ExplosionManager("fire")
         self.turret_explosioner = ExplosionManager("turret")
 
@@ -276,7 +284,9 @@ class PlayerStage(TileStage):
     def update(self, event_info: EventInfo):
         super().update()
 
-        self.player.update(event_info, self.tilemap, self.enemies)
+        self.ring.update(self.player.rect, self.player)
+
+        self.player.update(event_info, self.tilemap, self.enemies, self.ring)
         self.event_info = event_info
 
         # Temporary checking here
@@ -285,6 +295,9 @@ class PlayerStage(TileStage):
 
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
+
+        self.ring.draw(screen, self.camera)
+
         self.player.draw(screen, self.camera)
 
 

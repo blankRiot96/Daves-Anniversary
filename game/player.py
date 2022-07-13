@@ -7,11 +7,12 @@ import typing
 import pygame
 import random
 
-from game.common import TILE_HEIGHT, TILE_WIDTH, EventInfo
+from game.common import SAVE_DATA, TILE_HEIGHT, TILE_WIDTH, EventInfo
 from game.entity import Entity, EntityFacing, EntityStates
 from game.items.grapple import Grapple, Swing
-from game.utils import get_neighboring_tiles, pixel_to_tile
+from game.utils import get_neighboring_tiles, load_font, pixel_to_tile
 from library.effects.explosions import ExplosionManager
+from library.particles import TextParticle
 from library.ui.healthbar import PlayerHealthBar
 from library.utils.animation import Animation
 from library.utils.funcs import flip_images
@@ -35,12 +36,15 @@ class Player(Entity):
         walk_frames: typing.List[pygame.Surface],
         camera,
         particle_manager,
+        has_ring=False
     ):
         super().__init__(settings, self.MAX_HP)
         # set player stats
         self.change_settings(settings)
         self.hp = 100
+        self.prev_hp = self.hp
 
+        self.has_ring = has_ring
         self.alive = True
         self._hp = self.MAX_HP
         self.animations = {
@@ -60,6 +64,11 @@ class Player(Entity):
 
         self.grapple = Grapple(self, self.camera, self.particle_manager, settings)
         self.healthbar = PlayerHealthBar(self, self.particle_manager, (10, 10), 180, 15)
+
+        self.ring_img = pygame.Surface((16, 16))
+        self.ring_img.fill((128, 128, 128))
+
+        self.screen = None
 
     def _config_grapple(self, settings):
         self.grapple.GRAPPLE_RANGE = settings["grapple_range"]
@@ -107,7 +116,7 @@ class Player(Entity):
         if not self.touched_ground:
             self.state = EntityStates.JUMP
 
-    def update(self, event_info: EventInfo, tilemap, enemies) -> None:
+    def update(self, event_info: EventInfo, tilemap, enemies, ring) -> None:
         """
         Updates the player class
         Handles key input
@@ -158,6 +167,27 @@ class Player(Entity):
         # HP Testing
         if self.hp <= 0:
             self.alive = False
+        if self.hp <= 50 and self.has_ring and self.hp - self.prev_hp < 0:
+            ring.on_ground = True
+            ring.rect.midbottom = SAVE_DATA["latest_checkpoint"]
+            
+            self.particle_manager.add(
+                TextParticle(
+                    screen=self.screen,
+                    image=load_font(16).render(
+                        "Ring dropped at last checkpoint!", True, (255, 255, 255)
+                    ),
+                    pos=self.vec,
+                    vel=(0, -2),
+                    alpha_speed=3,
+                    lifespan=100,
+                )
+            )
+
+            self.has_ring = False
+
+        self.prev_hp = self.hp
+
         # if random.random() < 0.05:
         #     self.hp -= 5
 
@@ -175,6 +205,10 @@ class Player(Entity):
             screen: pygame.Surface to draw player on
             camera: camera.Camera to adjust position
         """
+        # GOOFY
+        self.screen = screen
+
+
         self.handle_jump_exp(screen, camera)
         # self.swing.draw(screen)
         self.grapple.draw(screen)
@@ -186,3 +220,6 @@ class Player(Entity):
             animation.draw(screen, camera.apply(self.vec).topleft)
         else:
             screen.blit(animation.frames[0], camera.apply(self.vec))
+        
+        if self.has_ring:
+            screen.blit(self.ring_img, (210, 10))
