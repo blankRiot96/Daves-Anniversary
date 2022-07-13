@@ -4,7 +4,8 @@ The source code is distributed under the MIT license.
 """
 
 import abc
-from asyncio import events
+from calendar import day_abbr
+from dataclasses import dataclass
 import logging
 from typing import Optional
 
@@ -14,6 +15,7 @@ from game.background import BackGroundEffect
 from game.common import (ASSETS_DIR, HEIGHT, MAP_DIR, SAVE_DATA, SETTINGS_DIR, WIDTH,
                          EventInfo)
 from game.enemy import MovingPlatform, MovingWall, Ungrappleable
+from game.interactables.barrels import Barrel, EasterEgg
 from game.interactables.checkpoint import Checkpoint
 from game.interactables.notes import Note
 from game.interactables.portal import Portal
@@ -54,7 +56,11 @@ class InitLevelStage(abc.ABC):
         self.assets = load_assets("level")
         self.event_info = {"dt": 0}
 
-        self.tilemap = TileLayerMap(MAP_DIR / "dimension_one.tmx")
+        if "ending" in switch_info:
+            self.tilemap = TileLayerMap(MAP_DIR / "ending.tmx")
+        else:
+            self.tilemap = TileLayerMap(MAP_DIR / "dimension_one.tmx")
+
 
         self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
         self.next_state: Optional[States] = None
@@ -74,7 +80,9 @@ class InitLevelStage(abc.ABC):
         self.portals = set()
         self.notes = set()
         self.spikes = set()
+        self.barrels = set()
         self.particle_manager = ParticleManager(self.camera)
+        self.paused = False
 
         self.latest_checkpoint_id = SAVE_DATA["latest_checkpoint_id"]
 
@@ -102,7 +110,7 @@ class InitLevelStage(abc.ABC):
 
         self.player = Player(
             self.settings[self.current_dimension.value],
-            self.latest_checkpoint,
+            (0, 0) if "ending" in switch_info else self.latest_checkpoint,
             self.assets["dave_walk"],
             self.camera,
             self.particle_manager,
@@ -125,7 +133,8 @@ class InitLevelStage(abc.ABC):
 class RenderBackgroundStage(InitLevelStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-        self.background_manager = BackGroundEffect(self.assets)
+        print("ending" in self.switch_info)
+        self.background_manager = BackGroundEffect(self.assets, "ending" in self.switch_info)
 
     def update(self):
         self.background_manager.update(self.event_info)
@@ -180,8 +189,13 @@ class RenderNoteStage(RenderPortalStage):
         for note in self.notes:
             note.draw(screen, self.camera)
 
-
-class RenderEnemyStage(RenderNoteStage):
+class RenderBarrelStage(RenderNoteStage):
+    def draw(self, screen):
+        super().draw(screen)
+        for barrel in self.barrels:
+            barrel.draw(screen, self.camera) 
+        
+class RenderEnemyStage(RenderBarrelStage):
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
         for enemy in self.enemies:
@@ -223,7 +237,39 @@ class ShooterStage(RenderEnemyStage):
             shooter.draw(screen, self.camera)
 
 
-class TileStage(ShooterStage):
+
+class OptionalStageWife(ShooterStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        self.mad = False
+        if "ending" not in self.switch_info:
+            return 
+        
+        class Wife:
+            def __init__(self, pos, img) -> None:
+                self.pos = pos 
+                self.img = img
+        self.wife = [Wife((obj.x, obj.y), self.assets["wife"]) for obj in 
+        self.tilemap.tilemap.get_layer_by_name("wife")][0]
+
+
+    def update(self) -> None:
+        super().update()
+        if "ending" not in self.switch_info:
+            return 
+        
+
+    def draw(self, screen):
+        super().draw(screen)
+        if not self.mad and "ending" not in self.switch_info:
+            return 
+        else:
+            self.mad = True
+        
+        screen.blit(self.assets["wife"], (50, 50))
+
+
+class TileStage(OptionalStageWife):
     """
     Handles tilemap rendering
     """
@@ -373,8 +419,7 @@ class CheckpointStage(SpikeStage):
                 self.latest_checkpoint_id = checkpoint.id
                 SAVE_DATA["latest_checkpoint_id"] = self.latest_checkpoint_id
 
-                if checkpoint.unlock_dimension:
-                    
+                if checkpoint.unlock_dimension:       
                     try:
                         self.unlocked_dimensions.append(
                             list(Dimensions)[len(self.unlocked_dimensions)]
@@ -452,17 +497,53 @@ class PortalStage(NoteStage):
 
         # Unlocking dimensions
         for event in event_info["events"]:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_5:
-                for dimension in Dimensions:
-                    if dimension not in self.unlocked_dimensions:
-                        self.unlocked_dimensions.append(dimension)
-                        break
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_5:
+                    for dimension in Dimensions:
+                        if dimension not in self.unlocked_dimensions:
+                            self.unlocked_dimensions.append(dimension)
+                            break
 
-                for portal in self.portals:
-                    portal.unlock_dimension(self.unlocked_dimensions)
+                    for portal in self.portals:
+                        portal.unlock_dimension(self.unlocked_dimensions)
+            
 
+class BarrelStage(PortalStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        self.barrels = {
+            Barrel(self.assets["barrel"], (obj.x, obj.y), obj.properties)
+            for obj in self.tilemap.tilemap.get_layer_by_name("barrels")
+        }
+        self.easter_egg = None
 
-class CameraStage(PortalStage):
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+        for barrel in set(self.barrels):
+            barrel.update(event_info["events"], self.player.rect)
+
+            if not barrel.alive:
+                if barrel.contains_easter_egg:
+                    self.easter_egg = EasterEgg(pygame.transform.scale(self.assets["easter"], (16, 16)), barrel.rect.topleft + pygame.Vector2(120, 0))
+
+                self.turret_explosioner.create_explosion(self.camera.apply(barrel.rect).topleft)
+                self.barrels.remove(barrel)
+
+        if self.easter_egg is not None:
+            self.easter_egg.update(self.player.rect, event_info["dt"])
+
+            if self.easter_egg.picked_up:
+                self.player.alive = False
+                self.next_state = States.LEVEL
+                self.switch_info = {"ending": True}  
+                SAVE_DATA["latest_dimension"] = Dimensions.HOMELAND_DIMENSION.value      
+    
+    def draw(self, screen):
+        super().draw(screen)
+        if self.easter_egg is not None:
+            self.easter_egg.draw(screen, self.camera)
+
+class CameraStage(BarrelStage):
     def update(self, event_info: EventInfo):
         super().update(event_info)
 
@@ -506,6 +587,9 @@ class UIStage(CameraStage):
         self.healthbar.draw(screen)
         self.particle_manager.draw()
 
+        for note in self.notes:
+            note.draw_text(screen, self.camera)
+
 
 class SFXStage(UIStage):
     def __init__(self, switch_info: dict) -> None:
@@ -529,6 +613,7 @@ class SFXStage(UIStage):
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
         self.sound_icon.draw(screen)
+
 
 
 class ExplosionStage(SFXStage):

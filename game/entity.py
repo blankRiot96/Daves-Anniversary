@@ -65,7 +65,7 @@ class Entity(abc.ABC):
                     self.rect.left = neighboring_tile.rect.right
 
         self.rect.y += round(self.vel.y)
-
+    
         for neighboring_tile in neighboring_tiles:
             if neighboring_tile.rect.colliderect(self.rect):
                 if self.vel.y > 0:

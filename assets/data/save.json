@@ -3,10 +3,10 @@
   "has_ring": false,
   "last_volume": 0.09,
   "latest_checkpoint": [
-    0,
-    0
+    2152,
+    256
   ],
-  "latest_checkpoint_id": 0,
-  "num_extra_dims_unlocked": 0,
-  "latest_dimension": "parallel_dimension"
+  "latest_checkpoint_id": 1,
+  "num_extra_dims_unlocked": 6,
+  "latest_dimension": "homeland_dimension"
 }

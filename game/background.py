@@ -24,6 +24,8 @@ _BACKGROUND_COLORS = {
     Dimensions.ALIEN_DIMENSION: (14, 13, 20),
     Dimensions.VOLCANIC_DIMENSION: (19, 16, 15),
     Dimensions.MOON_DIMENSION: (20, 16, 19),
+    Dimensions.WATER_DIMENSION: (7, 20, 39),
+    Dimensions.HOMELAND_DIMENSION: (14, 62, 87)
 }
 
 
@@ -140,12 +142,16 @@ class BackGroundEffect:
     LINE_PADDING = 300
     INIT_LINE = WIDTH
 
-    def __init__(self, assets) -> None:
+    def __init__(self, assets, ending: bool = False) -> None:
         self.lines = []
         self.line_gen = Time(1)
         self.rotating_rectangles = []
         self.rotat_rect_gen = Time(0.3)
         self.assets = assets
+        if ending:
+            self.rotating_img = self.assets["heart"]
+        else:
+            self.rotating_img = self.assets["rotating_rect"]
 
     def update(self, event_info):
         dt = event_info["dt"]
@@ -166,7 +172,7 @@ class BackGroundEffect:
                 self.rotating_rectangles.remove(rect)
 
         if self.rotat_rect_gen.update():
-            self.rotating_rectangles.append(_RotatingRect(self.assets["rotating_rect"]))
+            self.rotating_rectangles.append(_RotatingRect(self.rotating_img))
 
     def draw(self, screen, camera, current_dimension):
         screen.fill(_BACKGROUND_COLORS[current_dimension])
