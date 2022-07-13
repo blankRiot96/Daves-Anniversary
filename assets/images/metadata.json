@@ -52,6 +52,16 @@
         "sprite_sheet": null,
         "convert_alpha": true,
         "states": ["level"]
+    },
+    "heart.png": {
+        "sprite_sheet": null,
+        "convert_alpha": true,
+        "states": ["level"]
+    },
+    "wife.png": {
+        "sprite_sheet": null,
+        "convert_alpha": true,
+        "states": ["level"]
     }
 }
 

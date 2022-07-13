@@ -31,6 +31,24 @@
         },
         "convert_alpha": true,
         "states": ["level"]
+    },
+
+
+    "water_dimension.png": {
+        "sprite_sheet": {
+            "size": [16, 16],
+            "bound": false
+        },
+        "convert_alpha": true,
+        "states": ["level"]
+    },
+    "homeland_dimension.png": {
+        "sprite_sheet": {
+            "size": [16, 16],
+            "bound": false
+        },
+        "convert_alpha": true,
+        "states": ["level"]
     }
 }
 

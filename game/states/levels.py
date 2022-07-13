@@ -4,6 +4,8 @@ The source code is distributed under the MIT license.
 """
 
 import abc
+from calendar import day_abbr
+from dataclasses import dataclass
 import logging
 from typing import Optional
 
@@ -52,7 +54,11 @@ class InitLevelStage(abc.ABC):
         self.assets = load_assets("level")
         self.event_info = {"dt": 0}
 
-        self.tilemap = TileLayerMap(MAP_DIR / "dimension_one.tmx")
+        if "ending" in switch_info:
+            self.tilemap = TileLayerMap(MAP_DIR / "ending.tmx")
+        else:
+            self.tilemap = TileLayerMap(MAP_DIR / "dimension_one.tmx")
+
 
         self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
         self.next_state: Optional[States] = None
@@ -98,7 +104,7 @@ class InitLevelStage(abc.ABC):
 
         self.player = Player(
             self.settings[self.current_dimension.value],
-            self.latest_checkpoint,
+            (0, 0) if "ending" in switch_info else self.latest_checkpoint,
             self.assets["dave_walk"],
             self.camera,
             self.particle_manager,
@@ -118,7 +124,8 @@ class InitLevelStage(abc.ABC):
 class RenderBackgroundStage(InitLevelStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-        self.background_manager = BackGroundEffect(self.assets)
+        print("ending" in self.switch_info)
+        self.background_manager = BackGroundEffect(self.assets, "ending" in self.switch_info)
 
     def update(self):
         self.background_manager.update(self.event_info)
@@ -222,10 +229,38 @@ class ShooterStage(RenderEnemyStage):
 
 
 
+class OptionalStageWife(ShooterStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        self.mad = False
+        if "ending" not in self.switch_info:
+            return 
+        
+        class Wife:
+            def __init__(self, pos, img) -> None:
+                self.pos = pos 
+                self.img = img
+        self.wife = [Wife((obj.x, obj.y), self.assets["wife"]) for obj in 
+        self.tilemap.tilemap.get_layer_by_name("wife")][0]
 
 
+    def update(self) -> None:
+        super().update()
+        if "ending" not in self.switch_info:
+            return 
+        
 
-class TileStage(ShooterStage):
+    def draw(self, screen):
+        super().draw(screen)
+        if not self.mad and "ending" not in self.switch_info:
+            return 
+        else:
+            self.mad = True
+        
+        screen.blit(self.assets["wife"], (50, 50))
+
+
+class TileStage(OptionalStageWife):
     """
     Handles tilemap rendering
     """
@@ -471,14 +506,19 @@ class BarrelStage(PortalStage):
 
             if not barrel.alive:
                 if barrel.contains_easter_egg:
-                    self.easter_egg = EasterEgg(pygame.transform.scale(self.assets["easter"], (16, 16)), barrel.rect.topleft)
+                    self.easter_egg = EasterEgg(pygame.transform.scale(self.assets["easter"], (16, 16)), barrel.rect.topleft + pygame.Vector2(120, 0))
 
                 self.turret_explosioner.create_explosion(self.camera.apply(barrel.rect).topleft)
                 self.barrels.remove(barrel)
 
         if self.easter_egg is not None:
             self.easter_egg.update(self.player.rect, event_info["dt"])
-        
+
+            if self.easter_egg.picked_up:
+                self.player.alive = False
+                self.next_state = States.LEVEL
+                self.switch_info = {"ending": True}  
+                SAVE_DATA["latest_dimension"] = Dimensions.HOMELAND_DIMENSION.value      
     
     def draw(self, screen):
         super().draw(screen)
@@ -552,6 +592,7 @@ class SFXStage(UIStage):
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
         self.sound_icon.draw(screen)
+
 
 
 class ExplosionStage(SFXStage):
