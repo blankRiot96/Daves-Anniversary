@@ -1,11 +1,11 @@
 {
   "first_time": false,
-  "last_volume": 0.0,
+  "last_volume": 0.04,
   "latest_checkpoint": [
-    2486,
-    816
+    2530,
+    1503
   ],
-  "latest_checkpoint_id": 5,
+  "latest_checkpoint_id": 9,
   "num_extra_dims_unlocked": 2,
-  "latest_dimension": "volcanic_dimension"
+  "latest_dimension": "moon_dimension"
 }

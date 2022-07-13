@@ -130,6 +130,9 @@ class Player(Entity):
 
         # NGL, I added this because it fixes the y collision with the enemies
         for enemy in enemies:
+            if enemy.name == "ungrappleable":
+                continue
+
             collidable_rects.append(enemy)
 
         # Add and cap gravity
