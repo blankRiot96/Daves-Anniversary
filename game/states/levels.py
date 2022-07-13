@@ -280,7 +280,7 @@ class PlayerStage(TileStage):
         self.event_info = event_info
 
         # Temporary checking here
-        if self.player.y > 2000:
+        if self.player.y > 2500:
             self.player.alive = False
 
     def draw(self, screen: pygame.Surface):
