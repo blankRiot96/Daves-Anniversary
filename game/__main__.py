@@ -10,6 +10,7 @@ import logging
 import pygame
 
 from game.common import AUDIO_DIR, DATA_DIR, HEIGHT, SAVE_DATA, WIDTH
+from game.states.credits import Credits
 from game.states.enums import States
 from game.states.intro import Dialogue
 from game.states.levels import Level
@@ -43,6 +44,7 @@ class Game:
             States.LEVEL: Level,
             States.MAIN_MENU: MainMenu,
             States.DIALOGUE: Dialogue,
+            States.CREDITS: Credits
         }
         self.game_state = self.perspective_states[self.state]({})
         self.clock = pygame.time.Clock()

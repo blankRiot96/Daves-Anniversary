@@ -31,6 +31,7 @@ from library.tiles import SpikeTile
 from library.transition import FadeTransition
 from library.ui.buttons import Button
 from library.ui.camera import Camera
+from library.ui.healthbar import PlayerHealthBar
 
 logger = logging.getLogger()
 
@@ -360,9 +361,14 @@ class CheckpointStage(SpikeStage):
                 SAVE_DATA["latest_checkpoint_id"] = self.latest_checkpoint_id
 
                 if checkpoint.unlock_dimension:
-                    self.unlocked_dimensions.append(
-                        list(Dimensions)[len(self.unlocked_dimensions)]
-                    )
+                    
+                    try:
+                        self.unlocked_dimensions.append(
+                            list(Dimensions)[len(self.unlocked_dimensions)]
+                        )
+                    except IndexError:
+                        continue
+
                     SAVE_DATA["num_extra_dims_unlocked"] += 1
 
                     for portal in self.portals:
@@ -458,6 +464,7 @@ class UIStage(CameraStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         self.buttons = ()
+        self.healthbar = PlayerHealthBar(self.player, self.particle_manager, (10, 10), 180, 15)
 
     def update(self, event_info: EventInfo):
         """
@@ -482,6 +489,8 @@ class UIStage(CameraStage):
         super().draw(screen)
         for button in self.buttons:
             button.draw(screen)
+
+        self.healthbar.draw(screen)
         self.particle_manager.draw()
 
 
