@@ -1,9 +1,11 @@
 {
   "first_time": false,
-  "last_volume": 0.13,
+  "last_volume": 0.09,
   "latest_checkpoint": [
     2152,
     256
   ],
-  "latest_dimension": "alien_dimension"
+  "latest_checkpoint_id": 1,
+  "num_extra_dims_unlocked": 4,
+  "latest_dimension": "volcanic_dimension"
 }

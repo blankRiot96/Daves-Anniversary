@@ -35,6 +35,5 @@ class Note(Interactable):
         self.alpha_expansion.update(self.interacting, event_info["dt"])
         self.text_surf.set_alpha(int(self.alpha_expansion.number))
 
-    def draw(self, screen: pygame.Surface, camera: Camera) -> None:
-        super().draw(screen, camera)
+    def draw_text(self, screen, camera: Camera):
         screen.blit(self.text_surf, camera.apply(self.text_rect))

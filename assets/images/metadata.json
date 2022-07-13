@@ -30,12 +30,25 @@
         "convert_alpha": true,
         "states": ["level"]
     },
+    "barrel.png": {
+        "sprite_sheet": {
+            "size": [16, 16],
+            "bound": false
+        },
+        "convert_alpha": true,
+        "states": ["level"]
+    },
     "moving_wall.png": {
         "sprite_sheet": null,
         "convert_alpha": false,
         "states": ["level"]
     },
     "spike.png": {
+        "sprite_sheet": null,
+        "convert_alpha": true,
+        "states": ["level"]
+    },
+    "easter.png": {
         "sprite_sheet": null,
         "convert_alpha": true,
         "states": ["level"]

@@ -13,6 +13,7 @@ from game.background import BackGroundEffect
 from game.common import (HEIGHT, MAP_DIR, SAVE_DATA, SETTINGS_DIR, WIDTH,
                          EventInfo)
 from game.enemy import MovingPlatform, MovingWall, Ungrappleable
+from game.interactables.barrels import Barrel, EasterEgg
 from game.interactables.checkpoint import Checkpoint
 from game.interactables.notes import Note
 from game.interactables.portal import Portal
@@ -71,6 +72,7 @@ class InitLevelStage(abc.ABC):
         self.portals = set()
         self.notes = set()
         self.spikes = set()
+        self.barrels = set()
         self.particle_manager = ParticleManager(self.camera)
         self.paused = False
 
@@ -171,8 +173,13 @@ class RenderNoteStage(RenderPortalStage):
         for note in self.notes:
             note.draw(screen, self.camera)
 
-
-class RenderEnemyStage(RenderNoteStage):
+class RenderBarrelStage(RenderNoteStage):
+    def draw(self, screen):
+        super().draw(screen)
+        for barrel in self.barrels:
+            barrel.draw(screen, self.camera) 
+        
+class RenderEnemyStage(RenderBarrelStage):
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
         for enemy in self.enemies:
@@ -212,6 +219,10 @@ class ShooterStage(RenderEnemyStage):
 
         for shooter in self.shooters:
             shooter.draw(screen, self.camera)
+
+
+
+
 
 
 class TileStage(ShooterStage):
@@ -361,7 +372,7 @@ class CheckpointStage(SpikeStage):
 
                 if checkpoint.unlock_dimension:
                     self.unlocked_dimensions.append(
-                        list(Dimensions)[len(self.unlocked_dimensions)]
+                        list(Dimensions)[len(self.unlocked_dimensions) - 1]
                     )
                     SAVE_DATA["num_extra_dims_unlocked"] += 1
 
@@ -444,8 +455,37 @@ class PortalStage(NoteStage):
                         portal.unlock_dimension(self.unlocked_dimensions)
             
 
+class BarrelStage(PortalStage):
+    def __init__(self, switch_info: dict) -> None:
+        super().__init__(switch_info)
+        self.barrels = {
+            Barrel(self.assets["barrel"], (obj.x, obj.y), obj.properties)
+            for obj in self.tilemap.tilemap.get_layer_by_name("barrels")
+        }
+        self.easter_egg = None
 
-class CameraStage(PortalStage):
+    def update(self, event_info: EventInfo):
+        super().update(event_info)
+        for barrel in set(self.barrels):
+            barrel.update(event_info["events"], self.player.rect)
+
+            if not barrel.alive:
+                if barrel.contains_easter_egg:
+                    self.easter_egg = EasterEgg(pygame.transform.scale(self.assets["easter"], (16, 16)), barrel.rect.topleft)
+
+                self.turret_explosioner.create_explosion(self.camera.apply(barrel.rect).topleft)
+                self.barrels.remove(barrel)
+
+        if self.easter_egg is not None:
+            self.easter_egg.update(self.player.rect, event_info["dt"])
+        
+    
+    def draw(self, screen):
+        super().draw(screen)
+        if self.easter_egg is not None:
+            self.easter_egg.draw(screen, self.camera)
+
+class CameraStage(BarrelStage):
     def update(self, event_info: EventInfo):
         super().update(event_info)
 
@@ -485,6 +525,9 @@ class UIStage(CameraStage):
         for button in self.buttons:
             button.draw(screen)
         self.particle_manager.draw()
+
+        for note in self.notes:
+            note.draw_text(screen, self.camera)
 
 
 class SFXStage(UIStage):
