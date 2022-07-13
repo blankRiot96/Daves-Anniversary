@@ -12,7 +12,7 @@ import pygame
 from game.background import BackGroundEffect
 from game.common import (HEIGHT, MAP_DIR, SAVE_DATA, SETTINGS_DIR, WIDTH,
                          EventInfo)
-from game.enemy import MovingPlatform, MovingWall
+from game.enemy import MovingPlatform, MovingWall, Ungrappleable
 from game.interactables.checkpoint import Checkpoint
 from game.interactables.notes import Note
 from game.interactables.portal import Portal
@@ -61,6 +61,11 @@ class InitLevelStage(abc.ABC):
             for enm in Dimensions
         }
 
+        self.unlocked_dimensions = [
+            Dimensions.PARALLEL_DIMENSION,
+            Dimensions.VOLCANIC_DIMENSION,
+        ]
+
         self.dimensions_traveled = {self.current_dimension}
         self.enemies = set()
         self.portals = set()
@@ -69,12 +74,25 @@ class InitLevelStage(abc.ABC):
         self.particle_manager = ParticleManager(self.camera)
         self.paused = False
 
+        self.latest_checkpoint_id = SAVE_DATA["latest_checkpoint_id"]
+
         self.checkpoints = {
             Checkpoint(
-                pygame.Rect(obj.x, obj.y, obj.width, obj.height), self.particle_manager
+                pygame.Rect(obj.x, obj.y, obj.width, obj.height), self.particle_manager, obj.unlock_dimension, obj.c_id
             )
             for obj in self.tilemap.tilemap.get_layer_by_name("checkpoints")
         }
+        self.num_extra_dims_unlocked = SAVE_DATA["num_extra_dims_unlocked"]
+
+        for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
+            if portal_obj.name == "portal":
+                self.portals.add(
+                    Portal(portal_obj, self.unlocked_dimensions, self.assets["portal"])
+                )
+
+        len_unlocked_dims = len(self.unlocked_dimensions)
+        for dimension in list(Dimensions)[len_unlocked_dims:len_unlocked_dims + self.num_extra_dims_unlocked]:
+            self.unlocked_dimensions.append(dimension)
 
         self.player = Player(
             self.settings[self.current_dimension.value],
@@ -158,6 +176,9 @@ class RenderEnemyStage(RenderNoteStage):
     def draw(self, screen: pygame.Surface):
         super().draw(screen)
         for enemy in self.enemies:
+            if enemy.name == "ungrappleable":
+                continue
+
             enemy.draw(self.event_info["dt"], screen, self.camera)
 
 
@@ -221,6 +242,12 @@ class TileStage(ShooterStage):
                         self.settings[self.current_dimension.value],
                         enemy_obj,
                         self.tilesets[self.current_dimension],
+                    )
+                )
+            elif enemy_obj.name == "ungrappleable":
+                self.enemies.add(
+                    Ungrappleable(
+                        enemy_obj
                     )
                 )
 
@@ -289,7 +316,13 @@ class EnemyStage(SpecialTileStage):
         super().update(event_info)
 
         for enemy in self.enemies:
-            enemy.update(event_info, self.tilemap, self.player)
+            if enemy.name == "ungrappleable":
+                continue
+            
+            if enemy.name == "moving_platform":
+                enemy.update(event_info, self.tilemap, self.player, self.shooters)
+            else:
+                enemy.update(event_info, self.tilemap, self.player)
 
 
 class SpikeStage(EnemyStage):
@@ -312,14 +345,32 @@ class CheckpointStage(SpikeStage):
 
     def update(self, event_info: EventInfo):
         super().update(event_info)
+
+        latest_checkpoint_id_cp = self.latest_checkpoint_id
+
         for checkpoint in self.checkpoints:
+
             if not checkpoint.text_spawned and checkpoint.rect.colliderect(
                 self.player.rect
-            ):
+            ) and (checkpoint.id > self.latest_checkpoint_id or checkpoint.id == 0):
                 self.latest_checkpoint = checkpoint.rect.midbottom
                 SAVE_DATA["latest_checkpoint"] = self.latest_checkpoint
 
-            checkpoint.update(self.player.rect)
+                self.latest_checkpoint_id = checkpoint.id
+                SAVE_DATA["latest_checkpoint_id"] = self.latest_checkpoint_id
+
+                if checkpoint.unlock_dimension:
+                    self.unlocked_dimensions.append(
+                        list(Dimensions)[len(self.unlocked_dimensions)]
+                    )
+                    SAVE_DATA["num_extra_dims_unlocked"] += 1
+
+                    for portal in self.portals:
+                        portal.unlock_dimension(self.unlocked_dimensions)
+
+                self.player.hp = 100
+
+            checkpoint.update(self.player.rect, latest_checkpoint_id_cp)
 
 
 class NoteStage(CheckpointStage):
@@ -339,16 +390,12 @@ class NoteStage(CheckpointStage):
 class PortalStage(NoteStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
-        self.unlocked_dimensions = [
-            Dimensions.PARALLEL_DIMENSION,
-            Dimensions.VOLCANIC_DIMENSION,
-        ]
 
-        for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
+        """for portal_obj in self.tilemap.tilemap.get_layer_by_name("portals"):
             if portal_obj.name == "portal":
                 self.portals.add(
                     Portal(portal_obj, self.unlocked_dimensions, self.assets["portal"])
-                )
+                )"""
 
     def update(self, event_info: EventInfo):
         super().update(event_info)
@@ -372,6 +419,9 @@ class PortalStage(NoteStage):
                 self.player.change_settings(self.settings[self.current_dimension.value])
                 # change enemy settings
                 for enemy in self.enemies:
+                    if enemy.name == "ungrappleable":
+                        continue
+
                     enemy.change_settings(self.settings[self.current_dimension.value])
 
                     if enemy.name == "moving_platform":
@@ -559,7 +609,7 @@ class TransitionStage(PauseStage):
         if not self.player.alive:
             self.transition.fade_in = False
             if self.transition.event:
-                self.next_state = States.MAIN_MENU
+                self.next_state = States.LEVEL
 
     def draw(self, screen: pygame.Surface) -> None:
         super().draw(screen)

@@ -59,7 +59,7 @@ class Grapple:
     def _grapple_extend(self, enemies):
         for enemy in enemies:
             if enemy.rect.collidepoint(self.grapple_endpoint):
-                return False
+                return False, enemy
         else:
             if (
                 self.grapple_startpoint.distance_to(self.grapple_endpoint)
@@ -68,7 +68,7 @@ class Grapple:
                 self.grapple_endpoint.x += math.cos(self.angle) * self.GRAPPLE_SPEED
                 self.grapple_endpoint.y += math.sin(self.angle) * self.GRAPPLE_SPEED
 
-        return True
+        return (True,)
 
     def _grapple_pull(self, event_info):
         distance_travelled = self.sigmoid(
@@ -126,8 +126,12 @@ class Grapple:
                     self.player.vel.x, self.player.vel.y = 0, 0
                 break
         else:
-            if not self._grapple_extend(enemies):
-                self.create_text_particle("Cannot grapple onto enemies")
+            tup = self._grapple_extend(enemies)
+            if not tup[0]:
+                if tup[1].name == "ungrappleable":
+                    self.create_text_particle("Target is ungrappleable")
+                else:
+                    self.create_text_particle("Cannot grapple onto enemies")
 
                 self.grapple_endpoint = self.grapple_startpoint
                 self.time_started_hold = 0

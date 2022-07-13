@@ -14,18 +14,19 @@ from library.particles import TextParticle
 class Checkpoint:
     FONT = load_font(16)
 
-    def __init__(self, rect, particle_manager):
+    def __init__(self, rect, particle_manager, unlock_dimension, c_id):
         self.rect = rect
-        print(self.rect)
 
         self.particle_manager = particle_manager
         self.text_spawned = False
+        self.unlock_dimension = unlock_dimension
+        self.id = c_id
 
         # GOOFY
         self.screen = None
 
-    def update(self, player_rect):
-        if not self.text_spawned and self.rect.colliderect(player_rect):
+    def update(self, player_rect, latest_checkpoint_id):
+        if not self.text_spawned and self.rect.colliderect(player_rect) and (self.id > latest_checkpoint_id or self.id == 0):
             self.text_spawned = True
 
             self.particle_manager.add(
