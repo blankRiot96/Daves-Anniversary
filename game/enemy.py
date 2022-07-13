@@ -172,17 +172,22 @@ class MovingPlatform(Enemy):
 
         return temp_surf
 
-    def update(self, event_info: EventInfo, tilemap, player) -> None:
+    def update(self, event_info: EventInfo, tilemap, player, shooters) -> None:
         self.vel.x = 0
 
         dt = event_info["dt"]
 
         self.vel.x = self.speed * dt * self.facing.value
 
-        player_rect = player.rect.copy()
-        player_rect.y += 1
-        if player_rect.colliderect(self.rect):
-            player.rect.x += round(self.vel.x)
+        for movable in {player}.union(shooters):
+            movable_rect = movable.rect.copy()
+            movable_rect.y += 5
+            if movable_rect.colliderect(self.rect):
+                movable.rect.x += round(self.vel.x)
+            
+            movable_rect.y -= 10
+            if movable_rect.colliderect(self.rect):
+                movable.rect.x += round(self.vel.x)
 
         self.rect.x += round(self.vel.x)
 
@@ -207,3 +212,10 @@ class MovingPlatform(Enemy):
 
     def draw(self, dt: float, screen: pygame.Surface, camera):
         screen.blit(self.surf, camera.apply(self.rect).topleft)
+
+
+class Ungrappleable:
+    def __init__(self, obj):
+        self.size = (int(obj.width), int(obj.height))
+        self.rect = pygame.Rect((obj.x, obj.y), self.size)
+        self.name = obj.name
