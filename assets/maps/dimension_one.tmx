@@ -10,6 +10,9 @@
   <object id="83" name="portal" x="162.667" y="1376.67" width="32" height="32"/>
   <object id="98" name="portal" x="2512.33" y="1472.33" width="32" height="32"/>
  </objectgroup>
+ <objectgroup id="8" name="ring">
+  <object id="134" name="ring" x="208" y="48" width="16" height="16"/>
+ </objectgroup>
  <objectgroup id="6" name="checkpoints">
   <object id="41" name="checkpoint" x="800" y="0" width="16" height="144.667">
    <properties>

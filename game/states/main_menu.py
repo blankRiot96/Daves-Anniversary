@@ -96,6 +96,7 @@ class UIStage(RenderBackgroundStage):
                 elif button.text == "reset":
                     SAVE_DATA.update({
                         "first_time": True,
+                        "has_ring": False,
                         "last_volume": 0.09,
                         "latest_checkpoint": [
                         0, 0
