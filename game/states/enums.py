@@ -15,6 +15,7 @@ class States(enum.Enum):
     LEVEL = "level"
     DIALOGUE = "dialogue"
     ENDING = "ending"
+    CREDITS = "credits"
 
 
 class Dimensions(enum.Enum):

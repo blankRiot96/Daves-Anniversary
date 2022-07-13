@@ -42,6 +42,20 @@ class Checkpoint:
                 )
             )
 
+            if self.unlock_dimension:
+                self.particle_manager.add(
+                    TextParticle(
+                        screen=self.screen,
+                        image=self.FONT.render(
+                            f"New dimension available!", True, (218, 224, 234)
+                        ),
+                        pos=player_rect.midtop,
+                        vel=(0, -3),
+                        alpha_speed=2,
+                        lifespan=120
+                    )
+                )
+
     def draw(self, screen):
         # GOOFY
         self.screen = screen

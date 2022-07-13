@@ -1,5 +1,6 @@
 {
   "first_time": false,
+  "has_ring": false,
   "last_volume": 0.09,
   "latest_checkpoint": [
     2152,

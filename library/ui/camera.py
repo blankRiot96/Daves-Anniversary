@@ -32,6 +32,13 @@ class Camera:
         target_pos = pygame.Rect(target_pos[0], target_pos[1], 0, 0)
 
         return target_pos.move((-self.camera.x, -self.camera.y))
+    
+    def hard_apply(
+        self, target_pos: Union[pygame.Rect, pygame.Vector2, tuple, list]
+    ) -> pygame.Rect:
+        target_pos = pygame.Rect(target_pos[0], target_pos[1], 0, 0)
+
+        return target_pos.move(self.camera.topleft)
 
     def adjust_to(self, dt: float, target_pos: pygame.Vector2) -> None:
         """
@@ -49,3 +56,9 @@ class Camera:
         self.camera.y += (
             dt * (target_pos.y - self.camera.y - self.camera_height // 2) // 26
         )
+    
+    def hard_adjust_to(self, target_pos: pygame.Vector2) -> None:
+        x = self.camera_width // 2 - target_pos.x
+        y = self.camera_height // 2 - target_pos.y
+
+        self.camera.topleft = (x, y)
