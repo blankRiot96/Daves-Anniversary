@@ -54,6 +54,11 @@ class Shooter:
         self.bullets = set()
         self.bullet_gen_time = Time(obj.properties["cooldown"])
         self.alive = True
+
+        try:
+            self.damage = obj.damage
+        except AttributeError:
+            self.damage = False
     
     def update(self, player, dt):
         test_value = [0, 0, 0]
@@ -75,7 +80,7 @@ class Shooter:
             bullet.update(dt)
 
             if bullet.rect.colliderect(player.rect):
-                test_value[0] = bullet.DAMAGE
+                test_value[0] = self.damage or bullet.DAMAGE
                 bullet.alive = False
 
             if not bullet.alive:

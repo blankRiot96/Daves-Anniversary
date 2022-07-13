@@ -154,7 +154,8 @@ class MovingParticle:
             self.alive = False
 
     def draw(self, camera):
-        self.screen.blit(self.image, camera.apply(self.pos))
+        if self.screen is not None:
+            self.screen.blit(self.image, camera.apply(self.pos))
 
 
 class TextParticle(MovingParticle):
