@@ -10,7 +10,7 @@ import pygame
 
 import library.utils
 from game.background import ParallaxBackground
-from game.common import HEIGHT, WIDTH, EventInfo
+from game.common import HEIGHT, SAVE_DATA, WIDTH, EventInfo
 from game.states.enums import States
 from library.sfx import SFXManager
 from library.sprite.load import load_assets
@@ -31,6 +31,8 @@ class InitMainMenuStage:
         )
         self.bg_scroll = [0]
         self.bg_direction = random.choice((-1, 1))
+
+        self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
 
 
 class RenderBackgroundStage(InitMainMenuStage):
@@ -91,6 +93,21 @@ class UIStage(RenderBackgroundStage):
                 elif button.text == "intro":
                     self._change_dim = True
                     self._next_state = States.DIALOGUE
+                elif button.text == "reset":
+                    SAVE_DATA.update({
+                        "first_time": True,
+                        "last_volume": 0.09,
+                        "latest_checkpoint": [
+                        0, 0
+                        ],
+                        "latest_checkpoint_id": 0,
+                        "num_extra_dims_unlocked": 0,
+                        "latest_dimension": "parallel_dimension"
+                    })
+                    self.transition.fade_out_in()
+                elif button.text == "credits":
+                    self._change_dim = True
+                    self._next_state = States.CREDITS
 
     def draw(self, screen: pygame.Surface):
         """
@@ -118,7 +135,6 @@ class TransitionStage(UIStage):
 
     def __init__(self, switch_info: dict):
         super().__init__(switch_info)
-        self.transition = FadeTransition(True, self.FADE_SPEED, (WIDTH, HEIGHT))
         self.next_state: Optional[States] = None
 
         # Store any information needed to be passed

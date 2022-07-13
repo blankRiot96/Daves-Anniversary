@@ -178,7 +178,7 @@ class Player(Entity):
         self.handle_jump_exp(screen, camera)
         # self.swing.draw(screen)
         self.grapple.draw(screen)
-        self.healthbar.draw(screen)
+        # self.healthbar.draw(screen)
 
         animation = self.animations[f"walk_{self.facing.name.lower()}"]
 

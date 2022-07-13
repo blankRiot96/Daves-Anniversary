@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="160" height="148" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="133">
+<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="160" height="148" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="134">
  <tileset firstgid="1" source="tilesets/parallel-dimension.tsx"/>
  <objectgroup id="3" name="portals">
   <object id="15" name="portal" x="554.667" y="63.3333" width="32" height="32"/>
@@ -583,5 +583,6 @@
   <object id="124" name="ungrappleable" x="2000" y="1616" width="128" height="16"/>
   <object id="130" name="ungrappleable" x="1808" y="1632" width="224" height="16"/>
   <object id="131" name="ungrappleable" x="416" y="1664" width="1152" height="16"/>
+  <object id="133" name="ungrappleable" x="960" y="1168" width="576" height="16"/>
  </objectgroup>
 </map>
