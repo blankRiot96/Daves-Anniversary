@@ -30,7 +30,8 @@ class EasterEgg:
         self.rect.topleft = self.vec
 
     def draw(self, screen, camera):
-        screen.blit(self.img, camera.apply(self.rect))
+        if not self.picked_up:
+            screen.blit(self.img, camera.apply(self.rect))
 
 
 class Barrel(Interactable):

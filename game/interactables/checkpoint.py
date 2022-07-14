@@ -42,7 +42,20 @@ class Checkpoint:
                 )
             )
 
-            if self.unlock_dimension:
+            if self.id == 10:  # End checkpoint
+                self.particle_manager.add(
+                    TextParticle(
+                        screen=self.screen,
+                        image=self.FONT.render(
+                            f"You made it!!!", True, (218, 224, 234)
+                        ),
+                        pos=player_rect.midtop,
+                        vel=(0, -3),
+                        alpha_speed=0.5,
+                        lifespan=240
+                    )
+                )
+            elif self.unlock_dimension:
                 self.particle_manager.add(
                     TextParticle(
                         screen=self.screen,

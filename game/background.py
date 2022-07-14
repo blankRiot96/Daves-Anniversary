@@ -142,7 +142,7 @@ class BackGroundEffect:
     LINE_PADDING = 300
     INIT_LINE = WIDTH
 
-    def __init__(self, assets, ending: bool = False) -> None:
+    def __init__(self, assets, ending: bool = False, has_easter=False) -> None:
         self.lines = []
         self.line_gen = Time(1)
         self.rotating_rectangles = []
@@ -152,6 +152,11 @@ class BackGroundEffect:
             self.rotating_img = self.assets["heart"]
         else:
             self.rotating_img = self.assets["rotating_rect"]
+        
+        if has_easter:
+            self.easter_img = self.assets["easter"]
+        else:
+            self.easter_img = None
 
     def update(self, event_info):
         dt = event_info["dt"]
@@ -173,6 +178,9 @@ class BackGroundEffect:
 
         if self.rotat_rect_gen.update():
             self.rotating_rectangles.append(_RotatingRect(self.rotating_img))
+
+            if random.random() < 0.4 and self.easter_img is not None:
+                self.rotating_rectangles.append(_RotatingRect(self.easter_img))
 
     def draw(self, screen, camera, current_dimension):
         screen.fill(_BACKGROUND_COLORS[current_dimension])

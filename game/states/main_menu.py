@@ -97,9 +97,10 @@ class UIStage(RenderBackgroundStage):
                     SAVE_DATA.update({
                         "first_time": True,
                         "has_ring": False,
+                        "has_easter_egg": False,
                         "last_volume": 0.09,
                         "latest_checkpoint": [
-                        0, 0
+                            0, 0
                         ],
                         "latest_checkpoint_id": 0,
                         "num_extra_dims_unlocked": 0,

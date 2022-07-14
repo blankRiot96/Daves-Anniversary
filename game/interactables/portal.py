@@ -19,6 +19,8 @@ class Portal(Interactable):
         self.current_dimension = next(self.dimension_cycle)
         self.dimension_change = False
 
+        self.name = obj.name
+
     def unlock_dimension(self, dimensions):
         self.dimension_cycle = itertools.cycle(dimensions)
 
@@ -35,3 +37,24 @@ class Portal(Interactable):
                         # switch to the next dimension
                         self.dimension_change = True
                         self.current_dimension = next(self.dimension_cycle)
+
+
+class EndPortal(Interactable):
+    def __init__(self, obj, imgs: list[pygame.Surface]):
+        super().__init__(imgs[0], imgs[1], (obj.x, obj.y))
+
+        self.entered = False
+        self.name = obj.name
+
+    def update(self, player_rect, events):
+        super().update(player_rect)
+        self.dimension_change = False
+        self.events = events
+
+        # if the player is standing next to the portal
+        if self.interacting:
+            for event in events["events"]:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_e:
+                        # switch to the next dimension
+                        self.entered = True

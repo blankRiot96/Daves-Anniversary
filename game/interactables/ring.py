@@ -7,11 +7,12 @@ from library.particles import TextParticle
 
 
 class Ring(Interactable):
-    def __init__(self, ring_img, pos: Pos, particle_manager) -> None:
+    def __init__(self, ring_img, pos: Pos, particle_manager, sfx_manager) -> None:
         super().__init__(ring_img, ring_img, pos)
 
         self.on_ground = True
         self.particle_manager = particle_manager
+        self.sfx_manager = sfx_manager
         self.screen = None
         
     def update(self, player_rect, player):
@@ -35,6 +36,8 @@ class Ring(Interactable):
                             lifespan=100,
                         )
                     )
+
+                    self.sfx_manager.play("item_pickup")
 
                 SAVE_DATA["has_ring"] = True
         

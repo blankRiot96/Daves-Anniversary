@@ -13,21 +13,22 @@ import pytmx
 
 from .tiles import SpikeTile, Tile
 
-
-class _ThinWrap(pytmx.TiledMap):
-    def get_layer_by_name(self, name: str):
-        try:
-            super().get_layer_by_name(name)
-        except ValueError:
-            return ()
-
 class TileLayerMap:
     """
     Adds some functions like render_map and make_map to enhance pytmx's tilemap
     """
 
     def __init__(self, map_path: pathlib.Path):
+        def overwritten_get_layer_by_name(name: str):
+            try:
+                return self.tilemap.layernames[name]
+            except KeyError:
+                return ()
+
         self.tilemap = pytmx.load_pygame(str(map_path))
+
+        self.tilemap.get_layer_by_name = overwritten_get_layer_by_name
+
         self.width = self.tilemap.width * self.tilemap.tilewidth
         self.height = self.tilemap.height * self.tilemap.tileheight
 

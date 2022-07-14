@@ -43,7 +43,7 @@ class _Bullet:
 class Shooter:
     BULLET_SPEED = 5.3
 
-    def __init__(self, image: pygame.Surface, obj) -> None:
+    def __init__(self, image: pygame.Surface, obj, sfx_manager) -> None:
         self.obj = obj 
         self.angle = obj.properties["angle"]
         self.image = pygame.transform.rotate(image,
@@ -54,6 +54,8 @@ class Shooter:
         self.bullets = set()
         self.bullet_gen_time = Time(obj.properties["cooldown"])
         self.alive = True
+
+        self.sfx_manager = sfx_manager
 
         try:
             self.damage = obj.damage
@@ -71,6 +73,9 @@ class Shooter:
                     max_dist=self.obj.properties["max_dist"]
                 )
             )
+
+            if pygame.Vector2(self.rect.topleft).distance_to(player.vec) < 15 * 16:
+                self.sfx_manager.play("turret_shoot")
         
         if player.rect.colliderect(self.rect) and not player.touched_ground:
             self.alive = False

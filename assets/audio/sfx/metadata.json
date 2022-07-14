@@ -1,0 +1,26 @@
+{
+    "grapple.mp3": {
+        "volume": 0.1,
+        "states": ["level"]
+    },
+    "portal.mp3": {
+        "volume": 0.75,
+        "states": ["level"]
+    },
+    "checkpoint.wav": {
+        "volume": 0.2,
+        "states": ["level"]
+    },
+    "item_pickup.wav": {
+        "volume": 0.4,
+        "states": ["level"]
+    },
+    "jump.wav": {
+        "volume": 0.1,
+        "states": ["level"]
+    },
+    "turret_shoot.wav": {
+        "volume": 0.1,
+        "states": ["level"]
+    }
+}
