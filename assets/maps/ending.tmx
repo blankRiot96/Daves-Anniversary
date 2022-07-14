@@ -27,7 +27,7 @@
 </data>
  </layer>
  <objectgroup id="2" name="wife">
-  <object id="1" name="Wife" x="331.822" y="48.5155" width="16" height="16"/>
+  <object id="1" name="Wife" x="336" y="48" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="3" name="notes"/>
  <objectgroup id="4" name="checkpoints"/>

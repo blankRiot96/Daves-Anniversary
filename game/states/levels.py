@@ -18,7 +18,7 @@ from game.enemy import MovingPlatform, MovingWall, Ungrappleable
 from game.interactables.barrels import Barrel, EasterEgg
 from game.interactables.checkpoint import Checkpoint
 from game.interactables.notes import Note
-from game.interactables.portal import Portal
+from game.interactables.portal import EndPortal, Portal
 from game.interactables.ring import Ring
 from game.interactables.sound_icon import SoundIcon
 from game.player import Player
@@ -45,6 +45,7 @@ class InitLevelStage(abc.ABC):
         Initialize some attributes
         """
 
+        self.switch_info = {}
         self.switch_info = switch_info
         self.current_dimension = Dimensions(
             SAVE_DATA["latest_dimension"]
@@ -93,7 +94,11 @@ class InitLevelStage(abc.ABC):
             for obj in self.tilemap.tilemap.get_layer_by_name("checkpoints")
         }
 
-        self.ring = [Ring(pygame.image.load(ASSETS_DIR / "images/ring.png"), (obj.x, obj.y), self.particle_manager) for obj in self.tilemap.tilemap.get_layer_by_name("ring")][0]
+        try:
+            self.ring = [Ring(pygame.image.load(ASSETS_DIR / "images/ring.png"), (obj.x, obj.y), self.particle_manager, self.sfx_manager) for obj in self.tilemap.tilemap.get_layer_by_name("ring")][0]
+        except IndexError:
+            self.ring = Ring(pygame.image.load(ASSETS_DIR / "images/ring.png"), (0, 0), self.particle_manager, self.sfx_manager)
+        
         self.ring.on_ground = not SAVE_DATA["has_ring"]
 
         self.num_extra_dims_unlocked = SAVE_DATA["num_extra_dims_unlocked"]
@@ -102,6 +107,10 @@ class InitLevelStage(abc.ABC):
             if portal_obj.name == "portal":
                 self.portals.add(
                     Portal(portal_obj, self.unlocked_dimensions, self.assets["portal"])
+                )
+            elif portal_obj.name == "end":
+                self.portals.add(
+                    EndPortal(portal_obj, self.assets["portal"])
                 )
 
         len_unlocked_dims = len(self.unlocked_dimensions)
@@ -114,9 +123,12 @@ class InitLevelStage(abc.ABC):
             self.assets["dave_walk"],
             self.camera,
             self.particle_manager,
-            SAVE_DATA["has_ring"]
+            self.sfx_manager,
+            SAVE_DATA["has_ring"],
+            SAVE_DATA["has_easter_egg"]
         )
         self.player.ring_img = self.ring.non_interacting_img
+        self.player.easter_egg_img = pygame.transform.scale(pygame.image.load(ASSETS_DIR / "images/easter.png").convert_alpha(), (16, 16))
 
         self.explosion_manager = ExplosionManager("fire")
         self.turret_explosioner = ExplosionManager("turret")
@@ -134,7 +146,7 @@ class RenderBackgroundStage(InitLevelStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         print("ending" in self.switch_info)
-        self.background_manager = BackGroundEffect(self.assets, "ending" in self.switch_info)
+        self.background_manager = BackGroundEffect(self.assets, "ending" in self.switch_info, self.player.has_easter_egg)
 
     def update(self):
         self.background_manager.update(self.event_info)
@@ -179,6 +191,21 @@ class RenderPortalStage(RenderCheckpointStage):
                     )
                 else:
                     self.particle_manager.add(text_particle)
+            
+            if portal.name == "end" and portal.entered and not self.player.has_ring:
+                self.particle_manager.add(
+                    TextParticle(
+                        screen=screen,
+                        image=load_font(12).render(
+                            f"How can you forget her ring?!?", True, (255, 0, 0)
+                        ),
+                        pos=self.player.vec,
+                        vel=(0, -1.5),
+                        alpha_speed=3,
+                        lifespan=80,
+                    )
+                )
+                portal.entered = False
 
             portal.draw(screen, self.camera)
 
@@ -209,7 +236,7 @@ class ShooterStage(RenderEnemyStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         self.shooters = {
-            Shooter(self.assets["shooter"], obj)
+            Shooter(self.assets["shooter"], obj, self.sfx_manager)
             for obj in self.tilemap.tilemap.get_layer_by_name("shooters")
         }
 
@@ -242,13 +269,15 @@ class OptionalStageWife(ShooterStage):
     def __init__(self, switch_info: dict) -> None:
         super().__init__(switch_info)
         self.mad = False
-        if "ending" not in self.switch_info:
-            return 
-        
+
         class Wife:
             def __init__(self, pos, img) -> None:
                 self.pos = pos 
                 self.img = img
+
+        if "ending" not in self.switch_info:
+            return 
+
         self.wife = [Wife((obj.x, obj.y), self.assets["wife"]) for obj in 
         self.tilemap.tilemap.get_layer_by_name("wife")][0]
 
@@ -256,17 +285,16 @@ class OptionalStageWife(ShooterStage):
     def update(self) -> None:
         super().update()
         if "ending" not in self.switch_info:
-            return 
+            return
         
 
     def draw(self, screen):
         super().draw(screen)
-        if not self.mad and "ending" not in self.switch_info:
-            return 
-        else:
-            self.mad = True
-        
-        screen.blit(self.assets["wife"], (50, 50))
+        if "ending" in self.switch_info:
+            try:
+                screen.blit(self.assets["wife"], self.camera.apply(self.wife.pos))
+            except AttributeError:
+                pass
 
 
 class TileStage(OptionalStageWife):
@@ -430,7 +458,11 @@ class CheckpointStage(SpikeStage):
                     SAVE_DATA["num_extra_dims_unlocked"] += 1
 
                     for portal in self.portals:
+                        if portal.name == "end":
+                            continue
                         portal.unlock_dimension(self.unlocked_dimensions)
+                
+                self.sfx_manager.play("checkpoint")
 
                 self.player.hp = 100
 
@@ -467,11 +499,12 @@ class PortalStage(NoteStage):
         for portal in self.portals:
             # if we aren't changing the dimension,
             # we have to reset portal's dimension to the current one
-            if not portal.dimension_change:
+            if portal.name != "end" and not portal.dimension_change:
                 portal.current_dimension = self.current_dimension
                 SAVE_DATA["latest_dimension"] = self.current_dimension.value
             # otherwise (if we're switching dimension)
-            else:
+            elif portal.name != "end":
+                self.sfx_manager.play("portal")
                 logger.info(f"Changed dimension to: {portal.current_dimension}")
 
                 self.current_dimension = portal.current_dimension
@@ -495,6 +528,12 @@ class PortalStage(NoteStage):
 
             portal.update(self.player, event_info)
 
+            if portal.name == "end" and portal.entered and self.player.has_ring:
+                self.player.alive = False
+                self.next_state = States.LEVEL
+                self.switch_info = {"ending": True}
+                SAVE_DATA["latest_dimension"] = Dimensions.HOMELAND_DIMENSION.value
+
         # Unlocking dimensions
         for event in event_info["events"]:
             if event.type == pygame.KEYDOWN:
@@ -505,6 +544,8 @@ class PortalStage(NoteStage):
                             break
 
                     for portal in self.portals:
+                        if portal.name == "end":
+                            continue
                         portal.unlock_dimension(self.unlocked_dimensions)
             
 
@@ -532,11 +573,12 @@ class BarrelStage(PortalStage):
         if self.easter_egg is not None:
             self.easter_egg.update(self.player.rect, event_info["dt"])
 
-            if self.easter_egg.picked_up:
-                self.player.alive = False
-                self.next_state = States.LEVEL
-                self.switch_info = {"ending": True}  
-                SAVE_DATA["latest_dimension"] = Dimensions.HOMELAND_DIMENSION.value      
+            if self.easter_egg.picked_up and not self.player.has_easter_egg:
+                self.player.has_easter_egg = True
+
+                SAVE_DATA["has_easter_egg"] = True
+
+                self.sfx_manager.play("item_pickup")
     
     def draw(self, screen):
         super().draw(screen)
@@ -700,7 +742,7 @@ class TransitionStage(PauseStage):
 
         # Store any information needed to be passed
         # on to the next state
-        self.switch_info = {}
+        # self.switch_info = {}
 
     def update(self, event_info: EventInfo):
         super().update(event_info)

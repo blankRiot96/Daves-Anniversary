@@ -36,7 +36,9 @@ class Player(Entity):
         walk_frames: typing.List[pygame.Surface],
         camera,
         particle_manager,
-        has_ring=False
+        sfx_manager,
+        has_ring=False,
+        has_easter_egg = False
     ):
         super().__init__(settings, self.MAX_HP)
         # set player stats
@@ -44,7 +46,6 @@ class Player(Entity):
         self.hp = 100
         self.prev_hp = self.hp
 
-        self.has_ring = has_ring
         self.alive = True
         self._hp = self.MAX_HP
         self.animations = {
@@ -57,16 +58,20 @@ class Player(Entity):
 
         self.camera = camera
         self.particle_manager = particle_manager
+        self.sfx_manager = sfx_manager
 
         self.rect = pygame.Rect(pos, self.SIZE)
         self.jump_exp = ExplosionManager("smoke-jump")
         self.is_jump = False
 
-        self.grapple = Grapple(self, self.camera, self.particle_manager, settings)
+        self.grapple = Grapple(self, self.camera, self.particle_manager, self.sfx_manager, settings)
         self.healthbar = PlayerHealthBar(self, self.particle_manager, (10, 10), 180, 15)
 
-        self.ring_img = pygame.Surface((16, 16))
-        self.ring_img.fill((128, 128, 128))
+        self.has_ring = has_ring
+        self.ring_img = None  # Monki patched in levels
+
+        self.has_easter_egg = has_easter_egg
+        self.easter_egg_img = None  # Monki patched in levels
 
         self.screen = None
 
@@ -111,6 +116,8 @@ class Player(Entity):
                     self.is_jump = True
                     self.vel.y = self.jump_height
                     self.touched_ground = False
+
+                    self.sfx_manager.play("jump")
 
         # if we are in the air
         if not self.touched_ground:
@@ -223,3 +230,5 @@ class Player(Entity):
         
         if self.has_ring:
             screen.blit(self.ring_img, (210, 10))
+        if self.has_easter_egg:
+            screen.blit(self.easter_egg_img, (250, 10))

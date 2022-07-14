@@ -1,12 +1,13 @@
 {
   "first_time": false,
-  "has_ring": false,
+  "has_ring": true,
+  "has_easter_egg": false,
   "last_volume": 0.09,
   "latest_checkpoint": [
-    2152,
-    256
+    2486,
+    816
   ],
-  "latest_checkpoint_id": 1,
-  "num_extra_dims_unlocked": 6,
-  "latest_dimension": "homeland_dimension"
+  "latest_checkpoint_id": 5,
+  "num_extra_dims_unlocked": 2,
+  "latest_dimension": "parallel_dimension"
 }

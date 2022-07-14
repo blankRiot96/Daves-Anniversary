@@ -17,12 +17,13 @@ class Grapple:
     GRAPPLE_RANGE = 15
     GRAPPLE_SPEED = 20
 
-    def __init__(self, player, camera, particle_manager, settings):
+    def __init__(self, player, camera, particle_manager, sfx_manager, settings):
         self.GRAPPLE_RANGE = settings["grapple_range"]
         self.GRAPPLE_SPEED = settings["grapple_speed"]
         self.player = player
         self.camera = camera
         self.particle_manager = particle_manager
+        self.sfx_manager = sfx_manager
         self.screen = None  # GOOFINESS ALERT
 
         self.angle = 0
@@ -98,6 +99,8 @@ class Grapple:
                     )
                     self.grapple_time = pygame.time.get_ticks()
                     self.grapple_start_player_vec = self.player.vec.copy()
+
+                    self.sfx_manager.play("grapple")
 
                 if self.grapple_startpoint.distance_to(self.grapple_endpoint) > 20:
                     self._grapple_pull(event_info)
